@@ -1,0 +1,16 @@
+{
+	"papouhud.element.panels": "Pannelli amici",
+	"papouhud.element.compass": "Bussola",
+	"papouhud.element.coords": "Coordinate XYZ",
+	"papouhud.element.menu": "Apri questo menu",
+	"message.papouhud.on": "%s: ATTIVI",
+	"message.papouhud.off": "%s: DISATTIVATI",
+	"papouhud.config.title": "Impostazioni Papou HUD",
+	"papouhud.config.on": "Visibile",
+	"papouhud.config.off": "Nascosto",
+	"papouhud.config.none": "Nessuno",
+	"papouhud.config.press": "> premi un tasto <",
+	"papouhud.config.column_show": "Mostra",
+	"papouhud.config.column_key": "Scorciatoia",
+	"papouhud.config.hint": "Clicca una scorciatoia, poi premi il nuovo tasto. Canc = nessuno, Esc = annulla."
+}

@@ -1,0 +1,16 @@
+{
+	"papouhud.element.panels": "Friend panels",
+	"papouhud.element.compass": "Compass",
+	"papouhud.element.coords": "XYZ coordinates",
+	"papouhud.element.menu": "Open this menu",
+	"message.papouhud.on": "%s: ON",
+	"message.papouhud.off": "%s: OFF",
+	"papouhud.config.title": "Papou HUD settings",
+	"papouhud.config.on": "Shown",
+	"papouhud.config.off": "Hidden",
+	"papouhud.config.none": "None",
+	"papouhud.config.press": "> press a key <",
+	"papouhud.config.column_show": "Display",
+	"papouhud.config.column_key": "Shortcut",
+	"papouhud.config.hint": "Click a shortcut, then press the new key. Delete = none, Esc = cancel."
+}
