@@ -3,7 +3,7 @@
 	"id": "papouhud",
 	"version": "${version}",
 	"name": "Papou HUD",
-	"description": "Mostra in basso a sinistra nome, armatura e vita degli altri giocatori vicini, piu' una bussola in alto.",
+	"description": "Mostra in alto a sinistra nome, armatura e vita degli altri giocatori vicini, piu' una bussola con le coordinate in alto al centro.",
 	"authors": [
 		"Giulio"
 	],
