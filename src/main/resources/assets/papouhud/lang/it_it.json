@@ -27,5 +27,12 @@
 	"papouhud.furnace.xp": "%s XP",
 	"papouhud.furnace.tooltip.title": "Esperienza accumulata",
 	"papouhud.furnace.tooltip.points": "%s punti esperienza",
-	"papouhud.furnace.tooltip.hint": "La ottieni quando ritiri il prodotto"
+	"papouhud.furnace.tooltip.hint": "La ottieni quando ritiri il prodotto",
+	"papouhud.death.died": "Sei morto a %s (%s). Il teschio sulla locator bar punta li' per i prossimi %s minuti.",
+	"papouhud.death.reminder": "Punto di morte: a %s blocchi, in %s. Mancano %s min.",
+	"papouhud.death.reminder_other_dimension": "Punto di morte in %s, a %s. Mancano %s min.",
+	"papouhud.death.expired": "Segnalino del punto di morte rimosso.",
+	"papouhud.dimension.minecraft.overworld": "Overworld",
+	"papouhud.dimension.minecraft.the_nether": "Nether",
+	"papouhud.dimension.minecraft.the_end": "End"
 }

@@ -7,6 +7,7 @@ A client-side [Fabric](https://fabricmc.net/) mod for Minecraft that adds a smal
 - **XYZ coordinates** – your block position, right below the compass.
 - **Settings menu** – show or hide each element and rebind every shortcut in game.
 - **Furnace XP** – furnaces, smokers and blast furnaces show how much XP they are holding, next to their title.
+- **Death marker** – after you die, a skull on the locator bar points to where you died for 5 minutes, with a reminder in chat every minute.
 - **Update check** – when a new version is released, a popup at startup offers to install it.
 
 ![Friend panels in the top-left corner, compass and coordinates at the top](docs/screenshots/hud.png)
@@ -60,6 +61,20 @@ Stored XP only exists on the server: the game never sends it to players. Papou H
 
 On a server without the mod the XP line simply doesn't appear, and everything else keeps working. The value is the exact total; when you take the output, the game rounds any fraction randomly (e.g. 15.4 gives 15 XP, or 16 with a 40% chance).
 
+## Death marker
+
+When you die, a skull appears on the locator bar (the bar above the hotbar that shows other players). It points to the exact spot where you died, so you can walk back and pick up your items.
+
+![Skull on the locator bar and death reminders in chat](docs/screenshots/death-marker.png)
+
+- **Chat:** right after you respawn, the chat shows where you died. Then every minute it repeats how far away the spot is and how many minutes are left.
+- **Duration:** after 5 minutes the skull disappears with a last message. That's the same time dropped items take to despawn. The timer follows game time, so pausing in singleplayer pauses it too.
+- **Other dimensions:** the skull only shows in the dimension where you died. Elsewhere, the reminders tell you which dimension it was in.
+- **Dying again:** if you die again, the marker moves to the new spot and the 5 minutes restart.
+- **Locator bar:** right after respawning, the game shows the XP bar for a few seconds before switching back to the locator bar.
+
+Everything happens in your own game, so it works on any server and with Essential. To turn it off, set `"deathMarkerEnabled": false` in the config file.
+
 ## Updates
 
 At startup the mod checks this repository's [latest release](https://github.com/vittoriopippi/papou_mc/releases/latest). If it is newer than the installed version, a popup appears once, on the main menu:
@@ -83,6 +98,7 @@ Settings are saved automatically to `config/papou.json` in your game directory:
   "compassEnabled": true,
   "coordsEnabled": true,
   "checkForUpdates": true,
+  "deathMarkerEnabled": true,
   "configVersion": 2,
   "keyPanels": 72,
   "keyCompass": 78,

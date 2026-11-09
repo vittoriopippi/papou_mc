@@ -27,5 +27,12 @@
 	"papouhud.furnace.xp": "%s XP",
 	"papouhud.furnace.tooltip.title": "Stored experience",
 	"papouhud.furnace.tooltip.points": "%s XP points",
-	"papouhud.furnace.tooltip.hint": "You get it when you take the output"
+	"papouhud.furnace.tooltip.hint": "You get it when you take the output",
+	"papouhud.death.died": "You died at %s (%s). The skull on the locator bar points there for the next %s minutes.",
+	"papouhud.death.reminder": "Death point: %s blocks away, at %s. %s min left.",
+	"papouhud.death.reminder_other_dimension": "Death point in %s, at %s. %s min left.",
+	"papouhud.death.expired": "Death point marker removed.",
+	"papouhud.dimension.minecraft.overworld": "the Overworld",
+	"papouhud.dimension.minecraft.the_nether": "the Nether",
+	"papouhud.dimension.minecraft.the_end": "the End"
 }

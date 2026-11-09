@@ -7,7 +7,10 @@ import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContext;
 import net.fabricmc.fabric.api.client.gametest.v1.screenshot.TestScreenshotOptions;
+import net.minecraft.client.gui.screens.DeathScreen;
 import net.minecraft.client.gui.screens.TitleScreen;
+import net.minecraft.core.GlobalPos;
+import net.minecraft.world.level.Level;
 import net.minecraft.client.gui.screens.inventory.AbstractFurnaceScreen;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
@@ -72,6 +75,7 @@ public class ScreenshotGameTest implements FabricClientGameTest {
 			context.setScreen(() -> null);
 
 			furnaceXp(context, world);
+			deathMarker(context, world);
 		}
 
 		context.waitForScreen(TitleScreen.class);
@@ -124,6 +128,51 @@ public class ScreenshotGameTest implements FabricClientGameTest {
 		context.waitTicks(5);
 		context.takeScreenshot(options("furnace-xp-tooltip"));
 		context.setScreen(() -> null);
+	}
+
+	/**
+	 * Die at a known spot, respawn, and check that the skull waypoint points there; capture the
+	 * locator bar with the chat reminders, then fast-forward past the 5 minutes and check it is gone.
+	 */
+	private static void deathMarker(ClientGameTestContext context, TestSingleplayerContext world) {
+		BlockPos deathSpot = new BlockPos(25, -60, -10);
+		world.getServer().runCommand("tp @a 25 -60 -10");
+		world.getConnection().waitForClientboundPackets();
+		context.waitTicks(5);
+		world.getServer().runCommand("kill @a");
+		context.waitForScreen(DeathScreen.class);
+		context.runOnClient(mc -> mc.player.respawn());
+		context.waitFor(mc -> mc.player != null && mc.player.isAlive() && DeathMarker.deathPos != null);
+		context.setScreen(() -> null);
+
+		GlobalPos recorded = context.computeOnClient(mc -> DeathMarker.deathPos);
+		if (!recorded.pos().equals(deathSpot) || recorded.dimension() != Level.OVERWORLD) {
+			throw new AssertionError("Death marker at " + recorded + ", expected " + deathSpot + " in the overworld");
+		}
+		context.waitTicks(2);
+		if (!context.computeOnClient(mc -> mc.getConnection().getWaypointManager().hasWaypoints())) {
+			throw new AssertionError("Death waypoint is not on the locator bar");
+		}
+
+		// After respawning, vanilla shows the XP bar for 100 ticks before the locator bar comes back.
+		// Look towards the death spot so the skull sits in the middle of the locator bar, then
+		// jump to the 1-minute reminder so the chat shows both messages. Friend panels are hidden
+		// for this shot so they don't cover the chat.
+		context.getInput().lookAt(deathSpot.above());
+		context.runOnClient(mc -> PapouConfig.get().panelsEnabled = false);
+		context.waitTicks(110);
+		context.runOnClient(mc -> DeathMarker.elapsedTicks = DeathMarker.MESSAGE_INTERVAL_TICKS - 1);
+		context.waitTicks(5);
+		context.takeScreenshot(options("death-marker"));
+		context.runOnClient(mc -> PapouConfig.get().panelsEnabled = true);
+
+		context.runOnClient(mc -> DeathMarker.elapsedTicks = DeathMarker.DURATION_TICKS - 1);
+		context.waitTicks(3);
+		boolean stillThere = context.computeOnClient(
+				mc -> DeathMarker.deathPos != null || mc.getConnection().getWaypointManager().hasWaypoints());
+		if (stillThere) {
+			throw new AssertionError("Death marker still shown after 5 minutes");
+		}
 	}
 
 	private static ResourceKey<Recipe<?>> recipe(String id) {

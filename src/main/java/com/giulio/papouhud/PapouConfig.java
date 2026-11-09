@@ -25,6 +25,9 @@ public final class PapouConfig {
 	/** All'avvio controlla su GitHub se c'e' una nuova versione. */
 	public boolean checkForUpdates = true;
 
+	/** Dopo la morte, teschio sulla locator bar e promemoria in chat per 5 minuti. */
+	public boolean deathMarkerEnabled = true;
+
 	/** Versione del formato: se il file salvato e' piu' vecchio, le scorciatoie tornano ai valori predefiniti. */
 	public int configVersion;
 
