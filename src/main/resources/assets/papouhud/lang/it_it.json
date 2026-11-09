@@ -12,5 +12,16 @@
 	"papouhud.config.press": "> premi un tasto <",
 	"papouhud.config.column_show": "Mostra",
 	"papouhud.config.column_key": "Scorciatoia",
-	"papouhud.config.hint": "Clicca una scorciatoia, poi premi il nuovo tasto. Canc = nessuno, Esc = annulla."
+	"papouhud.config.hint": "Clicca una scorciatoia, poi premi il nuovo tasto. Canc = nessuno, Esc = annulla.",
+	"papouhud.update.title": "Aggiornamento di Papou HUD disponibile",
+	"papouhud.update.message": "E' uscita la versione %s (hai la %s). Scaricarla ora? Verra' installata quando chiudi il gioco.",
+	"papouhud.update.message_manual": "E' uscita la versione %s (hai la %s). Aprire la pagina di download?",
+	"papouhud.update.yes": "Aggiorna",
+	"papouhud.update.open_page": "Apri pagina",
+	"papouhud.update.no": "Non ora",
+	"papouhud.update.downloading": "Download di Papou HUD %s...",
+	"papouhud.update.downloaded": "Papou HUD %s scaricato",
+	"papouhud.update.restart": "Verra' installato quando chiudi il gioco.",
+	"papouhud.update.failed": "Aggiornamento di Papou HUD fallito",
+	"papouhud.update.failed_hint": "Scaricalo dalla pagina delle release su GitHub."
 }

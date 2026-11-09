@@ -18,7 +18,8 @@ import net.minecraft.world.entity.player.Player;
  *  - un pannello in alto a sinistra per ogni altro giocatore noto al client (entro la
  *    distanza di caricamento): nome, armatura, punti armatura e cuori;
  *  - una bussola in alto con direzione e punti cardinali, e sotto le coordinate XYZ;
- *  - un menu (tasto configurabile) per attivare/disattivare gli elementi e scegliere le scorciatoie.
+ *  - un menu (tasto configurabile) per attivare/disattivare gli elementi e scegliere le scorciatoie;
+ *  - all'avvio, un popup se su GitHub c'e' una versione piu' recente (vedi UpdateChecker).
  */
 public class PapouHudClient implements ClientModInitializer {
 	private static final int MARGIN = 4;
@@ -34,6 +35,8 @@ public class PapouHudClient implements ClientModInitializer {
 	@Override
 	public void onInitializeClient() {
 		ClientTickEvents.END_CLIENT_TICK.register(this::handleHotkeys);
+		ClientTickEvents.END_CLIENT_TICK.register(UpdateChecker::tick);
+		UpdateChecker.start();
 
 		HudElementRegistry.attachElementAfter(
 				VanillaHudElements.CHAT,

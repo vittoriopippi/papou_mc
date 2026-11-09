@@ -12,5 +12,16 @@
 	"papouhud.config.press": "> press a key <",
 	"papouhud.config.column_show": "Display",
 	"papouhud.config.column_key": "Shortcut",
-	"papouhud.config.hint": "Click a shortcut, then press the new key. Delete = none, Esc = cancel."
+	"papouhud.config.hint": "Click a shortcut, then press the new key. Delete = none, Esc = cancel.",
+	"papouhud.update.title": "Papou HUD update available",
+	"papouhud.update.message": "Version %s is out (you have %s). Download it now? It will be installed when you close the game.",
+	"papouhud.update.message_manual": "Version %s is out (you have %s). Open the download page?",
+	"papouhud.update.yes": "Update",
+	"papouhud.update.open_page": "Open page",
+	"papouhud.update.no": "Not now",
+	"papouhud.update.downloading": "Downloading Papou HUD %s...",
+	"papouhud.update.downloaded": "Papou HUD %s downloaded",
+	"papouhud.update.restart": "It will be installed when you close the game.",
+	"papouhud.update.failed": "Papou HUD update failed",
+	"papouhud.update.failed_hint": "Download it from the GitHub releases page."
 }

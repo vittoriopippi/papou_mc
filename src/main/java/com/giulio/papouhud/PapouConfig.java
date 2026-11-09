@@ -22,6 +22,9 @@ public final class PapouConfig {
 	public boolean compassEnabled = true;
 	public boolean coordsEnabled = true;
 
+	/** All'avvio controlla su GitHub se c'e' una nuova versione. */
+	public boolean checkForUpdates = true;
+
 	/** Versione del formato: se il file salvato e' piu' vecchio, le scorciatoie tornano ai valori predefiniti. */
 	public int configVersion;
 
