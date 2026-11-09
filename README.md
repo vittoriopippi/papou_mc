@@ -6,7 +6,7 @@ A client-side [Fabric](https://fabricmc.net/) mod for Minecraft that adds a smal
 - **Compass** – a strip at the top of the screen with cardinal/intercardinal directions (north in red) and the current heading in degrees.
 - **XYZ coordinates** – your block position, right below the compass.
 - **Settings menu** – show or hide each element and rebind every shortcut in game.
-- **Furnace XP** – furnaces, smokers and blast furnaces show how much XP they are holding, under the output slot.
+- **Furnace XP** – furnaces, smokers and blast furnaces show how much XP they are holding, next to their title.
 - **Update check** – when a new version is released, a popup at startup offers to install it.
 
 ![Friend panels in the top-left corner, compass and coordinates at the top](docs/screenshots/hud.png)
@@ -46,11 +46,11 @@ In the settings menu, click a shortcut and press the new key. `Delete` or `Backs
 
 ## Furnace XP
 
-When you open a furnace, smoker or blast furnace, a pulsing XP orb and the amount of XP it has stored appear under the output slot. That's the XP you get when you take the output. Hover over it for a short explanation. Nothing is shown while the furnace holds no XP.
+When you open a furnace, smoker or blast furnace, a pulsing XP orb and the amount of XP it has stored appear on the title row, aligned to the right. That's the XP you get when you take the output. Hover over it for a short explanation. Nothing is shown while the furnace holds no XP.
 
-| Stored XP under the output slot | Tooltip on hover |
+| Stored XP on the title row | Tooltip on hover |
 | --- | --- |
-| ![Furnace showing an XP orb and 15.4 under the output slot](docs/screenshots/furnace-xp.png) | ![Tooltip: Stored experience, 15.4 XP points, you get it when you take the output](docs/screenshots/furnace-xp-tooltip.png) |
+| ![Furnace showing an XP orb and 15.4 on the title row](docs/screenshots/furnace-xp.png) | ![Tooltip: Stored experience, 15.4 XP points, you get it when you take the output](docs/screenshots/furnace-xp-tooltip.png) |
 
 Stored XP only exists on the server: the game never sends it to players. Papou HUD therefore reads it on the server side and sends it to players who have the mod:
 

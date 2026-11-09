@@ -17,7 +17,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.Util;
 
 /**
- * Sotto lo slot di output di fornace/affumicatoio/altoforno: una sfera di esperienza pulsante come
+ * Sulla riga del titolo di fornace/affumicatoio/altoforno, a destra: una sfera di esperienza pulsante come
  * quelle a terra, seguita dal valore scritto come il livello nella barra dell'esperienza.
  * Passandoci sopra col mouse compare una spiegazione.
  */
@@ -33,9 +33,13 @@ final class FurnaceXpOverlay {
 	private static final int ORB_INSET = 3;
 	private static final int ORB_VISIBLE = 10;
 
-	/** Centro dello slot di output e riga libera sotto di esso, nelle coordinate della GUI (176x166). */
-	private static final int OUTPUT_CENTER_X = 124;
-	private static final int TEXT_Y = 60;
+	/**
+	 * Sulla riga del titolo ("Fornace"), allineato a destra con lo stesso margine di 8 px della
+	 * scritta "Inventario" a sinistra. Coordinate della GUI della fornace (176x166).
+	 */
+	private static final int GUI_WIDTH = 176;
+	private static final int RIGHT_MARGIN = 8;
+	private static final int TEXT_Y = 6;
 	private static final int GAP = 2;
 	private static final int XP_GREEN = 0xFF80FF20;
 	private static final int OUTLINE = 0xFF000000;
@@ -81,7 +85,7 @@ final class FurnaceXpOverlay {
 		Font font = Minecraft.getInstance().font;
 		String number = format(stored);
 		int width = ORB_VISIBLE + GAP + font.width(number);
-		int left = screen.leftPos + OUTPUT_CENTER_X - width / 2;
+		int left = screen.leftPos + GUI_WIDTH - RIGHT_MARGIN - width;
 		int top = screen.topPos + TEXT_Y;
 
 		// Parte visibile della sfera da (left, top - 1): alta come il testo (8 px) piu' il bordo.

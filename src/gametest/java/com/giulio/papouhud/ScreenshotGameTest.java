@@ -117,7 +117,8 @@ public class ScreenshotGameTest implements FabricClientGameTest {
 		int[] badge = context.computeOnClient(client -> {
 			AbstractFurnaceScreen<?> screen = (AbstractFurnaceScreen<?>) client.gui.screen();
 			int scale = client.getWindow().getGuiScale();
-			return new int[] {(screen.leftPos + 124) * scale, (screen.topPos + 64) * scale};
+			// Inside the badge, which ends 8 px from the right edge on the title row.
+			return new int[] {(screen.leftPos + 160) * scale, (screen.topPos + 10) * scale};
 		});
 		context.getInput().setCursorPos(badge[0], badge[1]);
 		context.waitTicks(5);
