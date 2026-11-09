@@ -8,6 +8,13 @@ import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContext;
 import net.fabricmc.fabric.api.client.gametest.v1.screenshot.TestScreenshotOptions;
 import net.minecraft.client.gui.screens.TitleScreen;
+import net.minecraft.client.gui.screens.inventory.AbstractFurnaceScreen;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.player.RemotePlayer;
@@ -63,6 +70,8 @@ public class ScreenshotGameTest implements FabricClientGameTest {
 			context.waitTicks(80);
 			context.takeScreenshot(options("settings"));
 			context.setScreen(() -> null);
+
+			furnaceXp(context, world);
 		}
 
 		context.waitForScreen(TitleScreen.class);
@@ -74,6 +83,39 @@ public class ScreenshotGameTest implements FabricClientGameTest {
 		context.waitTicks(5);
 		context.takeScreenshot(options("update-popup"));
 		context.setScreen(TitleScreen::new);
+	}
+
+	/**
+	 * A furnace that has smelted 12 raw iron (0.7 XP each) and cooked 20 beef (0.35 XP each) holds
+	 * 15.4 XP: the server must send exactly that to the client, which shows it under the output slot.
+	 */
+	private static void furnaceXp(ClientGameTestContext context, TestSingleplayerContext world) {
+		BlockPos pos = new BlockPos(0, -60, 3);
+		world.getServer().runCommand("setblock 0 -60 3 minecraft:furnace");
+		world.getServer().runOnServer(server -> {
+			AbstractFurnaceBlockEntity furnace = (AbstractFurnaceBlockEntity) server.overworld().getBlockEntity(pos);
+			furnace.recipesUsed.addTo(recipe("iron_ingot_from_smelting_raw_iron"), 12);
+			furnace.recipesUsed.addTo(recipe("cooked_beef"), 20);
+			furnace.setItem(0, new ItemStack(Items.RAW_IRON, 5));
+			furnace.setItem(1, new ItemStack(Items.COAL, 8));
+			furnace.setItem(2, new ItemStack(Items.IRON_INGOT, 12));
+			server.getPlayerList().getPlayers().getFirst().openMenu(furnace);
+		});
+
+		context.waitForScreen(AbstractFurnaceScreen.class);
+		context.waitFor(client -> client.player.containerMenu.containerId == FurnaceXpOverlay.containerId);
+		float received = context.computeOnClient(client -> FurnaceXpOverlay.xp);
+		if (Math.abs(received - 15.4f) > 0.001f) {
+			throw new AssertionError("Expected 15.4 XP from the server, got " + received);
+		}
+
+		context.waitTicks(5);
+		context.takeScreenshot(options("furnace-xp"));
+		context.setScreen(() -> null);
+	}
+
+	private static ResourceKey<Recipe<?>> recipe(String id) {
+		return ResourceKey.create(Registries.RECIPE, Identifier.withDefaultNamespace(id));
 	}
 
 	private static TestScreenshotOptions options(String name) {

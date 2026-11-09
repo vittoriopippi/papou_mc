@@ -3,17 +3,21 @@
 	"id": "papouhud",
 	"version": "${version}",
 	"name": "Papou HUD",
-	"description": "Mostra in alto a sinistra nome, armatura e vita degli altri giocatori vicini, piu' una bussola con le coordinate in alto al centro.",
+	"description": "Mostra in alto a sinistra nome, armatura e vita degli altri giocatori vicini, piu' una bussola con le coordinate in alto al centro e l'XP accumulata nelle fornaci.",
 	"authors": [
 		"Giulio"
 	],
 	"license": "CC0-1.0",
-	"environment": "client",
+	"environment": "*",
 	"entrypoints": {
+		"main": [
+			"com.giulio.papouhud.PapouHudCommon"
+		],
 		"client": [
 			"com.giulio.papouhud.PapouHudClient"
 		]
 	},
+	"accessWidener": "papouhud.classtweaker",
 	"depends": {
 		"fabricloader": ">=0.19.3",
 		"minecraft": "~26.2",

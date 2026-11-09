@@ -7,6 +7,8 @@ base {
 }
 
 loom {
+	accessWidenerPath = file("src/main/resources/papouhud.classtweaker")
+
 	mods {
 		"papouhud" {
 			sourceSet sourceSets.main

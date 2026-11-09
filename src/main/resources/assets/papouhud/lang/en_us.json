@@ -23,5 +23,6 @@
 	"papouhud.update.downloaded": "Papou HUD %s downloaded",
 	"papouhud.update.restart": "It will be installed when you close the game.",
 	"papouhud.update.failed": "Papou HUD update failed",
-	"papouhud.update.failed_hint": "Download it from the GitHub releases page."
+	"papouhud.update.failed_hint": "Download it from the GitHub releases page.",
+	"papouhud.furnace.xp": "%s XP"
 }

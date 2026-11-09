@@ -1,0 +1,5 @@
+classTweaker	v1	official
+accessible	field	net/minecraft/world/level/block/entity/AbstractFurnaceBlockEntity	recipesUsed	Lit/unimi/dsi/fastutil/objects/Reference2IntOpenHashMap;
+accessible	field	net/minecraft/world/inventory/AbstractFurnaceMenu	container	Lnet/minecraft/world/Container;
+accessible	field	net/minecraft/client/gui/screens/inventory/AbstractContainerScreen	leftPos	I
+accessible	field	net/minecraft/client/gui/screens/inventory/AbstractContainerScreen	topPos	I

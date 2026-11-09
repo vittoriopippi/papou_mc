@@ -19,7 +19,8 @@ import net.minecraft.world.entity.player.Player;
  *    distanza di caricamento): nome, armatura, punti armatura e cuori;
  *  - una bussola in alto con direzione e punti cardinali, e sotto le coordinate XYZ;
  *  - un menu (tasto configurabile) per attivare/disattivare gli elementi e scegliere le scorciatoie;
- *  - all'avvio, un popup se su GitHub c'e' una versione piu' recente (vedi UpdateChecker).
+ *  - all'avvio, un popup se su GitHub c'e' una versione piu' recente (vedi UpdateChecker);
+ *  - nelle fornaci, l'XP accumulata (vedi FurnaceXpOverlay e, lato server, FurnaceXpSync).
  */
 public class PapouHudClient implements ClientModInitializer {
 	private static final int MARGIN = 4;
@@ -37,6 +38,7 @@ public class PapouHudClient implements ClientModInitializer {
 		ClientTickEvents.END_CLIENT_TICK.register(this::handleHotkeys);
 		ClientTickEvents.END_CLIENT_TICK.register(UpdateChecker::tick);
 		UpdateChecker.start();
+		FurnaceXpOverlay.register();
 
 		HudElementRegistry.attachElementAfter(
 				VanillaHudElements.CHAT,
