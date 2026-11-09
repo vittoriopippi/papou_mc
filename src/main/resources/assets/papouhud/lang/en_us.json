@@ -24,5 +24,7 @@
 	"papouhud.update.restart": "It will be installed when you close the game.",
 	"papouhud.update.failed": "Papou HUD update failed",
 	"papouhud.update.failed_hint": "Download it from the GitHub releases page.",
-	"papouhud.furnace.xp": "%s XP"
+	"papouhud.furnace.tooltip.title": "Stored experience",
+	"papouhud.furnace.tooltip.points": "%s XP points",
+	"papouhud.furnace.tooltip.hint": "You get it when you take the output"
 }

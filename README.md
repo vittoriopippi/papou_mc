@@ -46,9 +46,11 @@ In the settings menu, click a shortcut and press the new key. `Delete` or `Backs
 
 ## Furnace XP
 
-When you open a furnace, smoker or blast furnace, the XP it has stored appears in green under the output slot. That's the XP you get when you take the output.
+When you open a furnace, smoker or blast furnace, a pulsing XP orb and the amount of XP it has stored appear under the output slot. That's the XP you get when you take the output. Hover over it for a short explanation. Nothing is shown while the furnace holds no XP.
 
-![Furnace showing 15.4 stored XP under the output slot](docs/screenshots/furnace-xp.png)
+| Stored XP under the output slot | Tooltip on hover |
+| --- | --- |
+| ![Furnace showing an XP orb and 15.4 under the output slot](docs/screenshots/furnace-xp.png) | ![Tooltip: Stored experience, 15.4 XP points, you get it when you take the output](docs/screenshots/furnace-xp-tooltip.png) |
 
 Stored XP only exists on the server: the game never sends it to players. Papou HUD therefore reads it on the server side and sends it to players who have the mod:
 

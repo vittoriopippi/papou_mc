@@ -109,8 +109,19 @@ public class ScreenshotGameTest implements FabricClientGameTest {
 			throw new AssertionError("Expected 15.4 XP from the server, got " + received);
 		}
 
+		// Mouse away from the badge, then over it to show the tooltip.
+		context.getInput().setCursorPos(0, 0);
 		context.waitTicks(5);
 		context.takeScreenshot(options("furnace-xp"));
+
+		int[] badge = context.computeOnClient(client -> {
+			AbstractFurnaceScreen<?> screen = (AbstractFurnaceScreen<?>) client.gui.screen();
+			int scale = client.getWindow().getGuiScale();
+			return new int[] {(screen.leftPos + 124) * scale, (screen.topPos + 64) * scale};
+		});
+		context.getInput().setCursorPos(badge[0], badge[1]);
+		context.waitTicks(5);
+		context.takeScreenshot(options("furnace-xp-tooltip"));
 		context.setScreen(() -> null);
 	}
 
