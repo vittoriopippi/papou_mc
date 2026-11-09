@@ -14,6 +14,18 @@ loom {
 	}
 }
 
+// Client game test (src/gametest) that takes the README screenshots: ./gradlew runClientGameTest
+// It is never included in the mod jar.
+fabricApi {
+	configureTests {
+		createSourceSet = true
+		modId = "papouhud-screenshots"
+		enableGameTests = false
+		enableClientGameTests = true
+		eula = true
+	}
+}
+
 dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	implementation "net.fabricmc:fabric-loader:${project.loader_version}"

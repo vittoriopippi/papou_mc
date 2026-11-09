@@ -1,0 +1,16 @@
+{
+	"schemaVersion": 1,
+	"id": "papouhud-screenshots",
+	"version": "1.0.0",
+	"name": "Papou HUD screenshots",
+	"description": "Client game test that captures the README screenshots.",
+	"environment": "client",
+	"entrypoints": {
+		"fabric-client-gametest": [
+			"com.giulio.papouhud.ScreenshotGameTest"
+		]
+	},
+	"depends": {
+		"papouhud": "*"
+	}
+}
