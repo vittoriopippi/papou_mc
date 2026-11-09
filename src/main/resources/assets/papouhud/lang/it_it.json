@@ -24,6 +24,7 @@
 	"papouhud.update.restart": "Verra' installato quando chiudi il gioco.",
 	"papouhud.update.failed": "Aggiornamento di Papou HUD fallito",
 	"papouhud.update.failed_hint": "Scaricalo dalla pagina delle release su GitHub.",
+	"papouhud.furnace.xp": "%s XP",
 	"papouhud.furnace.tooltip.title": "Esperienza accumulata",
 	"papouhud.furnace.tooltip.points": "%s punti esperienza",
 	"papouhud.furnace.tooltip.hint": "La ottieni quando ritiri il prodotto"
