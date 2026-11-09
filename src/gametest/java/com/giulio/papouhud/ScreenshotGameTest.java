@@ -87,7 +87,7 @@ public class ScreenshotGameTest implements FabricClientGameTest {
 
 	/**
 	 * A furnace that has smelted 12 raw iron (0.7 XP each) and cooked 20 beef (0.35 XP each) holds
-	 * 15.4 XP: the server must send exactly that to the client, which shows it under the output slot.
+	 * 15.4 XP: the server must send exactly that to the client, which shows it on the title row.
 	 */
 	private static void furnaceXp(ClientGameTestContext context, TestSingleplayerContext world) {
 		BlockPos pos = new BlockPos(0, -60, 3);
