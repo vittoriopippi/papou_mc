@@ -11,12 +11,13 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.player.Player;
 
 /**
- * Mod solo-client:
- *  - un pannello in alto a sinistra per ogni altro giocatore noto al client (entro la
- *    distanza di caricamento): nome, armatura, punti armatura e cuori;
+ * Mod lato client (con una parte lato server facoltativa):
+ *  - un pannello in alto a sinistra per ogni altro giocatore: nome, distanza (o dimensione),
+ *    armatura, punti armatura e cuori. Senza aiuto il client conosce solo chi e' entro la distanza
+ *    di caricamento; se il server ha Papou HUD (o il plugin Paper) manda anche gli altri (vedi
+ *    PlayersSync e RemotePlayers);
  *  - una bussola in alto con direzione e punti cardinali, e sotto le coordinate XYZ;
  *  - un menu (tasto configurabile) per attivare/disattivare gli elementi e scegliere le scorciatoie;
  *  - all'avvio, un popup se su GitHub c'e' una versione piu' recente (vedi UpdateChecker);
@@ -40,6 +41,7 @@ public class PapouHudClient implements ClientModInitializer {
 		ClientTickEvents.END_CLIENT_TICK.register(UpdateChecker::tick);
 		UpdateChecker.start();
 		FurnaceXpOverlay.register();
+		RemotePlayers.register();
 		ClientTickEvents.END_CLIENT_TICK.register(DeathMarker::tick);
 
 		HudElementRegistry.attachElementAfter(
@@ -65,7 +67,7 @@ public class PapouHudClient implements ClientModInitializer {
 
 		for (int i = 0; i < keys.length; i++) {
 			boolean down = inGame && keys[i] != PapouConfig.NO_KEY
-					&& InputConstants.isKeyDown(mc.getWindow(), keys[i]);
+					&& InputConstants.isKeyDown(keys[i]);
 			if (down && !wasDown[i]) {
 				switch (i) {
 					case 0 -> toggle(mc, config, "papouhud.element.panels", config.panelsEnabled = !config.panelsEnabled);
@@ -92,13 +94,9 @@ public class PapouHudClient implements ClientModInitializer {
 		}
 
 		int top = MARGIN;
-		for (Player other : mc.level.players()) {
-			if (other == mc.player) {
-				continue;
-			}
-
-			PlayerPanel.draw(graphics, mc, other, MARGIN, top);
-			top += PlayerPanel.height(other) + PANEL_GAP;
+		for (PlayerPanel.Data panel : PlayerPanel.collect(mc)) {
+			PlayerPanel.draw(graphics, mc, panel, MARGIN, top);
+			top += PlayerPanel.height(panel) + PANEL_GAP;
 		}
 	}
 

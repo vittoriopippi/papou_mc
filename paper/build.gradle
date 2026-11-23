@@ -1,0 +1,47 @@
+plugins {
+	id 'java'
+}
+
+base {
+	archivesName = "papouhud-paper"
+}
+
+repositories {
+	maven {
+		name = 'PaperMC'
+		url = 'https://repo.papermc.io/repository/maven-public/'
+	}
+	mavenCentral()
+}
+
+dependencies {
+	compileOnly "io.papermc.paper:paper-api:${project.paper_api_version}"
+}
+
+processResources {
+	def version = project.version
+	inputs.property "version", version
+
+	filesMatching("plugin.yml") {
+		expand "version": version
+	}
+}
+
+tasks.withType(JavaCompile).configureEach {
+	it.options.release = 25
+}
+
+// Same byte format as the mod: checked against the mod's src/test/resources/players-v1.hex.
+dependencies {
+	testImplementation "io.papermc.paper:paper-api:${project.paper_api_version}"
+	testImplementation platform("org.junit:junit-bom:${project.junit_version}")
+	testImplementation "org.junit.jupiter:junit-jupiter"
+	testRuntimeOnly "org.junit.platform:junit-platform-launcher"
+}
+
+test {
+	useJUnitPlatform()
+	def golden = rootProject.file("src/test/resources/players-v1.hex")
+	inputs.file(golden)
+	systemProperty "papouhud.golden", golden.absolutePath
+}

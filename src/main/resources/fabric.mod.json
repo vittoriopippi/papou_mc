@@ -3,7 +3,7 @@
 	"id": "papouhud",
 	"version": "${version}",
 	"name": "Papou HUD",
-	"description": "Mostra in alto a sinistra nome, armatura e vita degli altri giocatori vicini, piu' una bussola con le coordinate in alto al centro e l'XP accumulata nelle fornaci.",
+	"description": "Mostra in alto a sinistra nome, distanza, armatura e vita degli altri giocatori (tutti, anche lontani, se il server ha Papou HUD), piu' una bussola con le coordinate in alto al centro e l'XP accumulata nelle fornaci.",
 	"authors": [
 		"Giulio"
 	],
@@ -20,7 +20,7 @@
 	"accessWidener": "papouhud.classtweaker",
 	"depends": {
 		"fabricloader": ">=0.19.3",
-		"minecraft": "~26.2",
+		"minecraft": "~26.3",
 		"java": ">=25",
 		"fabric-api": "*"
 	}

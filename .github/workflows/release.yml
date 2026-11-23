@@ -1,0 +1,48 @@
+# Publishes a GitHub release when a v<version> tag is pushed (e.g. git tag v1.4.0 && git push origin v1.4.0).
+# The tag must match `version` in gradle.properties. Notes come from release-notes/v<version>.md.
+# Assets: papouhud-<version>.jar (the mod; the in-game update check downloads exactly this name),
+# then papouhud-<version>-sources.jar and papouhud-paper-<version>.jar (the Paper plugin).
+# The mod jar is uploaded first, on its own: versions before 1.4.0 take the first jar they find.
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "25"
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Check the tag matches gradle.properties
+        run: |
+          version=$(sed -n 's/^version=//p' gradle.properties)
+          if [ "v$version" != "$GITHUB_REF_NAME" ]; then
+            echo "Tag $GITHUB_REF_NAME, but gradle.properties says version=$version" >&2
+            exit 1
+          fi
+          test -f "release-notes/$GITHUB_REF_NAME.md" || { echo "Missing release-notes/$GITHUB_REF_NAME.md" >&2; exit 1; }
+          echo "VERSION=$version" >> "$GITHUB_ENV"
+
+      - name: Build and test
+        run: ./gradlew build
+
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" "build/libs/papouhud-$VERSION.jar" \
+            --title "Papou HUD $VERSION" --notes-file "release-notes/$GITHUB_REF_NAME.md"
+          gh release upload "$GITHUB_REF_NAME" "build/libs/papouhud-$VERSION-sources.jar"
+          gh release upload "$GITHUB_REF_NAME" "paper/build/libs/papouhud-paper-$VERSION.jar"

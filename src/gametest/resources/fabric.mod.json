@@ -3,11 +3,12 @@
 	"id": "papouhud-screenshots",
 	"version": "1.0.0",
 	"name": "Papou HUD screenshots",
-	"description": "Client game test that captures the README screenshots.",
+	"description": "Client game tests: the README screenshots, and (with PAPOUHUD_TEST_SERVER) a check against a real server.",
 	"environment": "client",
 	"entrypoints": {
 		"fabric-client-gametest": [
-			"com.giulio.papouhud.ScreenshotGameTest"
+			"com.giulio.papouhud.ScreenshotGameTest",
+			"com.giulio.papouhud.ServerGameTest"
 		]
 	},
 	"depends": {

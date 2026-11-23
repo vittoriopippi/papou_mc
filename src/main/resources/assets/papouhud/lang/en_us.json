@@ -24,6 +24,7 @@
 	"papouhud.update.restart": "It will be installed when you close the game.",
 	"papouhud.update.failed": "Papou HUD update failed",
 	"papouhud.update.failed_hint": "Download it from the GitHub releases page.",
+	"papouhud.update.wrong_minecraft": "Version %s needs Minecraft %s (you have %s).",
 	"papouhud.furnace.xp": "%s XP",
 	"papouhud.furnace.tooltip.title": "Stored experience",
 	"papouhud.furnace.tooltip.points": "%s XP points",
@@ -34,5 +35,8 @@
 	"papouhud.death.expired": "Death point marker removed.",
 	"papouhud.dimension.minecraft.overworld": "the Overworld",
 	"papouhud.dimension.minecraft.the_nether": "the Nether",
-	"papouhud.dimension.minecraft.the_end": "the End"
+	"papouhud.dimension.minecraft.the_end": "the End",
+	"papouhud.panel.dimension.minecraft.overworld": "Overworld",
+	"papouhud.panel.dimension.minecraft.the_nether": "Nether",
+	"papouhud.panel.dimension.minecraft.the_end": "The End"
 }

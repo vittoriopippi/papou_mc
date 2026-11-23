@@ -1,5 +1,6 @@
 package com.giulio.papouhud;
 
+import java.util.List;
 import java.util.UUID;
 
 import com.mojang.authlib.GameProfile;
@@ -21,6 +22,7 @@ import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.player.RemotePlayer;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -29,8 +31,11 @@ import net.minecraft.world.phys.Vec3;
 
 /**
  * Takes the README screenshots (run with {@code ./gradlew runClientGameTest}). They are saved in
- * the run directory's {@code screenshots} folder: friend panels + compass + coordinates, the settings
- * menu and the update popup.
+ * the run directory's {@code screenshots} folder: friend panels + compass + coordinates, friends far
+ * away, the settings menu, furnace XP, the death marker and the update popup. Along the way it checks
+ * that the integrated server sends the player list with the right armor.
+ *
+ * <p>Skipped when {@code PAPOUHUD_TEST_SERVER} is set: then only {@link ServerGameTest} runs.
  */
 public class ScreenshotGameTest implements FabricClientGameTest {
 	private static final int WIDTH = 1280;
@@ -40,6 +45,9 @@ public class ScreenshotGameTest implements FabricClientGameTest {
 
 	@Override
 	public void runTest(ClientGameTestContext context) {
+		if (System.getenv("PAPOUHUD_TEST_SERVER") != null) {
+			return;
+		}
 		// Resize the real window so the GUI is laid out for 1280x720, not just rendered at that size.
 		context.getInput().resizeWindow(WIDTH, HEIGHT);
 		context.waitTicks(2);
@@ -63,6 +71,8 @@ public class ScreenshotGameTest implements FabricClientGameTest {
 			}
 			world.getConnection().waitForChunksRender();
 
+			serverSendsPlayers(context, world);
+
 			context.runOnClient(mc -> addFriends(mc.level, mc.player));
 			// Let command feedback fade out of the chat.
 			context.waitTicks(240);
@@ -73,6 +83,8 @@ public class ScreenshotGameTest implements FabricClientGameTest {
 			context.waitTicks(80);
 			context.takeScreenshot(options("settings"));
 			context.setScreen(() -> null);
+
+			farFriends(context);
 
 			furnaceXp(context, world);
 			deathMarker(context, world);
@@ -173,6 +185,97 @@ public class ScreenshotGameTest implements FabricClientGameTest {
 		if (stillThere) {
 			throw new AssertionError("Death marker still shown after 5 minutes");
 		}
+	}
+
+	/**
+	 * The integrated server sends the player list ({@link PlayersSync}). With one player it would be
+	 * empty, so the test switch puts us in our own list; the armor must come through intact.
+	 */
+	private static void serverSendsPlayers(ClientGameTestContext context, TestSingleplayerContext world) {
+		System.setProperty(PlayersSync.INCLUDE_SELF_PROPERTY, "true");
+		try {
+			world.getServer().runCommand("item replace entity @a armor.head with "
+					+ "minecraft:diamond_helmet[damage=100,enchantments={protection:1}]");
+			world.getServer().runCommand("item replace entity @a armor.legs with "
+					+ "minecraft:leather_leggings[dyed_color=10511680]");
+			context.waitFor(mc -> {
+				PlayersPayload.Entry me = self(mc);
+				return me != null && me.armor().get(0).itemId().equals("minecraft:diamond_helmet")
+						&& me.armor().get(2).itemId().equals("minecraft:leather_leggings");
+			}, 200);
+			context.runOnClient(mc -> checkSelf(mc, self(mc)));
+		} finally {
+			System.clearProperty(PlayersSync.INCLUDE_SELF_PROPERTY);
+			world.getServer().runCommand("item replace entity @a armor.head with minecraft:air");
+			world.getServer().runCommand("item replace entity @a armor.legs with minecraft:air");
+		}
+		// Without the switch the list is empty again: the server sends that once.
+		context.waitFor(mc -> RemotePlayers.current().isEmpty(), 100);
+	}
+
+	static PlayersPayload.Entry self(net.minecraft.client.Minecraft mc) {
+		if (mc.player == null) {
+			return null;
+		}
+		return RemotePlayers.current().stream()
+				.filter(entry -> entry.uuid().equals(mc.player.getUUID()))
+				.findFirst().orElse(null);
+	}
+
+	/** Our own entry, as the server sent it, wearing the diamond helmet and leather leggings above. */
+	static void checkSelf(net.minecraft.client.Minecraft mc, PlayersPayload.Entry me) {
+		expect(me.name().equals(mc.player.getName().getString()), "name " + me.name());
+		expect(me.dimension().equals("minecraft:overworld"), "dimension " + me.dimension());
+		expect(me.maxHealth() == 20.0f && me.health() > 0.0f, "health " + me.health() + "/" + me.maxHealth());
+		expect(mc.player.position().distanceTo(new Vec3(me.x(), me.y(), me.z())) < 2.0, "position");
+		expect(me.armorValue() == 5, "armor points " + me.armorValue() + ", expected 3 + 2");
+
+		PlayersPayload.Armor helmet = me.armor().get(0);
+		expect(helmet.damage() == 100 && helmet.maxDamage() == 363 && helmet.glint(), "helmet " + helmet);
+		expect(me.armor().get(1).equals(PlayersPayload.Armor.EMPTY), "chestplate " + me.armor().get(1));
+		expect(me.armor().get(2).dyeColor() == 10511680, "leggings " + me.armor().get(2));
+
+		ItemStack rebuilt = helmet.toStack();
+		expect(rebuilt.is(Items.DIAMOND_HELMET) && rebuilt.getDamageValue() == 100 && rebuilt.hasFoil(),
+				"rebuilt helmet " + rebuilt);
+	}
+
+	private static void expect(boolean ok, String what) {
+		if (!ok) {
+			throw new AssertionError("Player list from the server: unexpected " + what);
+		}
+	}
+
+	/**
+	 * Friends the client can't see, as the server sends them: one in the Nether and one 1.3 km away.
+	 * Papou stays nearby, so the shot has both kinds.
+	 */
+	private static void farFriends(ClientGameTestContext context) {
+		context.runOnClient(mc -> {
+			mc.level.removeEntity(900_001, Entity.RemovalReason.DISCARDED);
+			mc.level.removeEntity(900_002, Entity.RemovalReason.DISCARDED);
+			Vec3 me = mc.player.position();
+			RemotePlayers.set(List.of(
+					farFriend("Giulio", "minecraft:the_nether", me, 16.0f, 18, List.of(
+							new PlayersPayload.Armor("minecraft:netherite_helmet", 40, 407, true, -1),
+							new PlayersPayload.Armor("minecraft:netherite_chestplate", 120, 592, true, -1),
+							new PlayersPayload.Armor("minecraft:diamond_leggings", 300, 495, false, -1),
+							PlayersPayload.Armor.EMPTY)),
+					farFriend("Steve", "minecraft:overworld", me.add(880, 14, -980), 9.0f, 3, List.of(
+							new PlayersPayload.Armor("minecraft:iron_helmet", 90, 165, false, -1),
+							PlayersPayload.Armor.EMPTY,
+							PlayersPayload.Armor.EMPTY,
+							new PlayersPayload.Armor("minecraft:leather_boots", 10, 65, false, 0xB02E26)))));
+		});
+		context.waitTicks(3);
+		context.takeScreenshot(options("far-friends"));
+		context.runOnClient(mc -> RemotePlayers.set(List.of()));
+	}
+
+	private static PlayersPayload.Entry farFriend(String name, String dimension, Vec3 pos, float health, int armorValue,
+			List<PlayersPayload.Armor> armor) {
+		return new PlayersPayload.Entry(UUID.nameUUIDFromBytes(name.getBytes()), name, dimension,
+				pos.x, pos.y, pos.z, health, 20.0f, armorValue, armor);
 	}
 
 	private static ResourceKey<Recipe<?>> recipe(String id) {

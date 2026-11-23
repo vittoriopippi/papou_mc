@@ -9,6 +9,7 @@ import java.time.Duration;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.mojang.blaze3d.Blaze3D;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.Version;
 import net.minecraft.client.Minecraft;
@@ -16,7 +17,6 @@ import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.util.Util;
 
 /**
  * All'avvio controlla su GitHub se esiste una release piu' recente e, la prima volta che si arriva
@@ -90,8 +90,8 @@ final class UpdateChecker {
 				JsonObject asset = element.getAsJsonObject();
 				String name = asset.get("name").getAsString();
 				String url = asset.get("browser_download_url").getAsString();
-				if (name.endsWith(".jar") && !name.endsWith("-sources.jar") && url.startsWith(DOWNLOAD_PREFIX)
-						&& !name.contains("/") && !name.contains("\\")) {
+				// Proprio il jar della mod: nella release ci sono anche i sorgenti e il plugin Paper.
+				if (name.equals(MOD_ID + "-" + latest + ".jar") && url.startsWith(DOWNLOAD_PREFIX)) {
 					jarName = name;
 					jarUrl = url;
 					break;
@@ -129,7 +129,7 @@ final class UpdateChecker {
 			if (canInstall) {
 				SelfUpdater.downloadAndSchedule(mc, release);
 			} else {
-				Util.getPlatform().openUri(release.pageUrl());
+				Blaze3D.openUri(URI.create(release.pageUrl()));
 			}
 		}, title, message,
 				Component.translatable(canInstall ? "papouhud.update.yes" : "papouhud.update.open_page"),

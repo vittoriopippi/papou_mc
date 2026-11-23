@@ -10,3 +10,7 @@ pluginManagement {
 }
 
 rootProject.name = 'papouhud'
+
+// Plugin Paper per i server Paper (Minecraft Cross): stesso pacchetto dei giocatori, piu' le barre
+// in alto per chi non ha la mod (anche Bedrock/Xbox via Geyser). Jar: paper/build/libs.
+include 'paper'

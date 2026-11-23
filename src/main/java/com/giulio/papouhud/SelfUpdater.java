@@ -13,16 +13,21 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.Locale;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.loader.api.Version;
+import net.fabricmc.loader.api.VersionParsingException;
 import net.fabricmc.loader.api.metadata.ModOrigin;
+import net.fabricmc.loader.api.metadata.version.VersionPredicate;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.network.chat.Component;
@@ -101,8 +106,10 @@ final class SelfUpdater {
 				} catch (IOException ignored) {
 					// Verra' rimosso al prossimo avvio.
 				}
-				toast(mc, Component.translatable("papouhud.update.failed"),
-						Component.translatable("papouhud.update.failed_hint"));
+				toast(mc, Component.translatable("papouhud.update.failed"), e instanceof WrongMinecraftException wrong
+						? Component.translatable("papouhud.update.wrong_minecraft",
+								release.version(), wrong.required, runningMinecraft().getFriendlyString())
+						: Component.translatable("papouhud.update.failed_hint"));
 			}
 		}, "Papou HUD update download");
 		thread.setDaemon(true);
@@ -128,7 +135,11 @@ final class SelfUpdater {
 		verify(pending, release.version());
 	}
 
-	/** Il file scaricato deve essere un jar di Papou HUD con la versione annunciata dalla release. */
+	/**
+	 * Il file scaricato deve essere un jar di Papou HUD con la versione annunciata dalla release, e
+	 * fatto per la versione di Minecraft in uso: altrimenti, una volta installato, Fabric si
+	 * rifiuterebbe di caricarlo (es. la 1.4.0 per 26.3 su un gioco ancora alla 26.2).
+	 */
 	private static void verify(Path jar, String expectedVersion) throws IOException {
 		try (ZipFile zip = new ZipFile(jar.toFile())) {
 			ZipEntry entry = zip.getEntry("fabric.mod.json");
@@ -141,9 +152,50 @@ final class SelfUpdater {
 						|| !expectedVersion.equals(json.get("version").getAsString())) {
 					throw new IOException("jar inatteso");
 				}
+				JsonObject depends = json.has("depends") ? json.getAsJsonObject("depends") : null;
+				JsonElement minecraft = depends != null ? depends.get("minecraft") : null;
+				if (minecraft != null && !matchesRunningMinecraft(minecraft)) {
+					throw new WrongMinecraftException(minecraft.isJsonArray()
+							? minecraft.getAsJsonArray().get(0).getAsString() : minecraft.getAsString());
+				}
 			}
 		} catch (RuntimeException e) {
 			throw new IOException(e);
+		}
+	}
+
+	/** In fabric.mod.json la versione di Minecraft e' un intervallo ("~26.3") o una lista (basta uno). */
+	private static boolean matchesRunningMinecraft(JsonElement requirement) {
+		List<String> ranges = new ArrayList<>();
+		if (requirement.isJsonArray()) {
+			requirement.getAsJsonArray().forEach(element -> ranges.add(element.getAsString()));
+		} else {
+			ranges.add(requirement.getAsString());
+		}
+		Version running = runningMinecraft();
+		for (String range : ranges) {
+			try {
+				if (VersionPredicate.parse(range).test(running)) {
+					return true;
+				}
+			} catch (VersionParsingException e) {
+				// Intervallo che non capiamo: meglio non installare.
+			}
+		}
+		return false;
+	}
+
+	private static Version runningMinecraft() {
+		return FabricLoader.getInstance().getModContainer("minecraft").orElseThrow().getMetadata().getVersion();
+	}
+
+	/** Il jar scaricato richiede un'altra versione di Minecraft. */
+	private static final class WrongMinecraftException extends IOException {
+		final String required;
+
+		WrongMinecraftException(String required) {
+			super("needs Minecraft " + required);
+			this.required = required.replaceFirst("^[~^=>< ]+", "");
 		}
 	}
 

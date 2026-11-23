@@ -106,7 +106,7 @@ public class PapouConfigScreen extends Screen {
 			} else if (getKey(i) == PapouConfig.NO_KEY) {
 				label = Component.translatable("papouhud.config.none");
 			} else {
-				label = InputConstants.Type.KEYSYM.getOrCreate(getKey(i)).getDisplayName();
+				label = InputConstants.Type.KEYBOARD.getOrCreate(getKey(i)).getDisplayName();
 			}
 			keyButtons[i].setMessage(label);
 		}
