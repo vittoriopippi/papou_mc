@@ -6,8 +6,8 @@ A client-side [Fabric](https://fabricmc.net/) mod for Minecraft that adds a smal
 - **Compass** – a strip at the top of the screen with cardinal/intercardinal directions (north in red) and the current heading in degrees.
 - **XYZ coordinates** – your block position, right below the compass.
 - **Settings menu** – show or hide each element and rebind every shortcut in game.
-- **Furnace XP** – furnaces, smokers and blast furnaces show how much XP they are holding, next to their title.
-- **Death marker** – after you die, a skull on the locator bar points to where you died for 5 minutes, with a reminder in chat every minute.
+- **Furnace XP** – furnaces, smokers and blast furnaces show how much XP they are holding, and the level you would reach by taking it, next to their title.
+- **Death markers** – after each death, a skull of its own color on the locator bar points to where you died, for as long as your dropped items last, with reminders in chat.
 - **Inventory Sorter on any server** – with [Inventory Sorter](https://modrinth.com/mod/inventory-sorting) set to "Sort by: Category", chests are sorted by category on servers without Inventory Sorter too, such as Paper (see [Inventory Sorter](#inventory-sorter)).
 - **Update check** – when a new version is released, a popup at startup offers to install it.
 
@@ -72,11 +72,13 @@ Bedrock players (Xbox, phone, Windows Bedrock, joining through [Geyser](https://
 
 ## Furnace XP
 
-When you open a furnace, smoker or blast furnace, the amount of XP it has stored (e.g. "15.4 XP") appears on the title row, aligned to the right, in the same style as the title. That's the XP you get when you take the output. Hover over it for a short explanation. Nothing is shown while the furnace holds no XP.
+When you open a furnace, smoker or blast furnace, the amount of XP it has stored (e.g. "15.4 XP") appears on the title row, aligned to the right, in the same style as the title, with the level you would reach by taking it on the line below ("→ lv 23"). That's the XP you get when you take the output. Hover over it for the details: your level now and after, with how far into the next level you would be. Nothing is shown while the furnace holds no XP.
 
 | Stored XP on the title row | Tooltip on hover |
 | --- | --- |
-| ![Furnace showing 15.4 XP on the title row](docs/screenshots/furnace-xp.png) | ![Tooltip: Stored experience, 15.4 XP points, you get it when you take the output](docs/screenshots/furnace-xp-tooltip.png) |
+| ![Furnace showing 15.4 XP and level 23 on the title row](docs/screenshots/furnace-xp.png) | ![Tooltip: Stored experience, 15.4 XP points, level 22 to 23, you get it when you take the output](docs/screenshots/furnace-xp-tooltip.png) |
+
+The level counts the whole points (15 of 15.4). If you wear or hold damaged gear with **Mending**, the XP repairs it first, so you would reach a lower level: the tooltip warns you when that's the case.
 
 Stored XP only exists on the server: the game never sends it to players. Papou HUD therefore reads it on the server side and sends it to players who have the mod:
 
@@ -88,14 +90,15 @@ On a server without the mod the XP line simply doesn't appear, and everything el
 
 ## Death marker
 
-When you die, a skull appears on the locator bar (the bar above the hotbar that shows other players). It points to the exact spot where you died, so you can walk back and pick up your items.
+When you die, a skull appears on the locator bar (the bar above the hotbar that shows other players). It points to the exact spot where you died, so you can walk back and pick up your items. Each death gets its own skull, in its own color (red, yellow, aqua, purple, green, orange), so if you die again on the way back you can find both spots. Up to 6 are kept; a seventh death replaces the oldest.
 
-![Skull on the locator bar and death reminders in chat](docs/screenshots/death-marker.png)
+![Two skulls on the locator bar and a death reminder in chat](docs/screenshots/death-marker.png)
 
-- **Chat:** right after you respawn, the chat shows where you died. Then every minute it repeats how far away the spot is and how many minutes are left.
-- **Duration:** after 5 minutes the skull disappears with a last message. That's the same time dropped items take to despawn. The timer follows game time, so pausing in singleplayer pauses it too.
-- **Other dimensions:** the skull only shows in the dimension where you died. Elsewhere, the reminders tell you which dimension it was in.
-- **Dying again:** if you die again, the marker moves to the new spot and the 5 minutes restart.
+- **How long:** a skull lasts as long as the items you dropped. In Minecraft, items on the ground vanish after 5 minutes, but their clock only runs while the chunk they are in is simulated, i.e. while a player is within the server's **simulation distance** (counted in chunks; 6 chunks, about 100 blocks, on a server set to 6). Far from everyone, or with the game paused in singleplayer, the items wait. The skulls follow the same rule: their 5 minutes only run while you, or a friend the server tells Papou HUD about, are close enough. The time you spend on the death screen counts too, because your body is still there.
+- **Picked up:** when you get within a few blocks of a skull and no items are left on the ground around it (you picked them up, or they burned), the skull goes away.
+- **Chat:** right after you respawn, the chat shows where you died and which skull points there. While a skull's clock is running, every minute it says how far away it is and how many minutes the items have left. When a skull goes away, the chat says why.
+- **Leaving the game:** the skulls are saved per server or world (in `config/papouhud-deaths.json`) and come back when you return, with a chat line listing them. The items are still there too, since nobody was near them.
+- **Other dimensions:** each skull only shows in the dimension where you died.
 - **Locator bar:** right after respawning, the game shows the XP bar for a few seconds before switching back to the locator bar.
 
 Everything happens in your own game, so it works on any server and with Essential. To turn it off, set `"deathMarkerEnabled": false` in the config file.

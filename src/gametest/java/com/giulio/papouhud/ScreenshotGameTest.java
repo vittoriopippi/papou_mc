@@ -122,6 +122,9 @@ public class ScreenshotGameTest implements FabricClientGameTest {
 	private static void furnaceXp(ClientGameTestContext context, TestSingleplayerContext world) {
 		BlockPos pos = new BlockPos(0, -60, 3);
 		world.getServer().runCommand("setblock 0 -60 3 minecraft:furnace");
+		// Level 22 and 60 of the 72 points to 23: the furnace's 15 points get the player to level 23.
+		world.getServer().runCommand("experience set @a 22 levels");
+		world.getServer().runCommand("experience set @a 60 points");
 		world.getServer().runOnServer(server -> {
 			AbstractFurnaceBlockEntity furnace = (AbstractFurnaceBlockEntity) server.overworld().getBlockEntity(pos);
 			furnace.recipesUsed.addTo(recipe("iron_ingot_from_smelting_raw_iron"), 12);
@@ -137,6 +140,11 @@ public class ScreenshotGameTest implements FabricClientGameTest {
 		float received = context.computeOnClient(client -> FurnaceXpOverlay.xp);
 		if (Math.abs(received - 15.4f) > 0.001f) {
 			throw new AssertionError("Expected 15.4 XP from the server, got " + received);
+		}
+		int levelAfter = context.computeOnClient(client ->
+				(int) XpLevels.levelAfter(client.player.experienceLevel, client.player.experienceProgress, 15));
+		if (levelAfter != 23) {
+			throw new AssertionError("Expected level 23 after taking the XP, got " + levelAfter);
 		}
 
 		// Mouse away from the badge, then over it to show the tooltip.
@@ -161,44 +169,80 @@ public class ScreenshotGameTest implements FabricClientGameTest {
 	 * locator bar with the chat reminders, then fast-forward past the 5 minutes and check it is gone.
 	 */
 	private static void deathMarker(ClientGameTestContext context, TestSingleplayerContext world) {
-		BlockPos deathSpot = new BlockPos(25, -60, -10);
-		world.getServer().runCommand("tp @a 25 -60 -10");
-		world.getConnection().waitForClientboundPackets();
-		context.waitTicks(5);
-		world.getServer().runCommand("kill @a");
-		context.waitForScreen(DeathScreen.class);
-		context.runOnClient(mc -> mc.player.respawn());
-		context.waitFor(mc -> mc.player != null && mc.player.isAlive() && DeathMarker.deathPos != null);
-		context.setScreen(() -> null);
-
-		GlobalPos recorded = context.computeOnClient(mc -> DeathMarker.deathPos);
-		if (!recorded.pos().equals(deathSpot) || recorded.dimension() != Level.OVERWORLD) {
-			throw new AssertionError("Death marker at " + recorded + ", expected " + deathSpot + " in the overworld");
+		BlockPos first = new BlockPos(25, -60, -10);
+		BlockPos second = new BlockPos(8, -60, -24);
+		die(context, world, first, 1);
+		DeathMarker.Marker red = context.computeOnClient(mc -> DeathMarker.markers.get(0));
+		if (!red.pos.pos().equals(first) || red.pos.dimension() != Level.OVERWORLD || red.color != DeathMarker.Color.RED) {
+			throw new AssertionError("First skull: " + red.color + " at " + red.pos + ", expected RED at " + first);
 		}
 		context.waitTicks(2);
 		if (!context.computeOnClient(mc -> mc.getConnection().getWaypointManager().hasWaypoints())) {
 			throw new AssertionError("Death waypoint is not on the locator bar");
 		}
 
+		// Dying again before picking up the first items: a second skull, in another color.
+		die(context, world, second, 2);
+		DeathMarker.Marker yellow = context.computeOnClient(mc -> DeathMarker.markers.get(1));
+		if (!yellow.pos.pos().equals(second) || yellow.color != DeathMarker.Color.YELLOW) {
+			throw new AssertionError("Second skull: " + yellow.color + " at " + yellow.pos + ", expected YELLOW at " + second);
+		}
+
 		// After respawning, vanilla shows the XP bar for 100 ticks before the locator bar comes back.
-		// Look towards the death spot so the skull sits in the middle of the locator bar, then
-		// jump to the 1-minute reminder so the chat shows both messages. Friend panels are hidden
-		// for this shot so they don't cover the chat.
-		context.getInput().lookAt(deathSpot.above());
+		// Look between the two spots so both skulls sit on the locator bar, then jump to the yellow
+		// one's 1-minute reminder so the chat shows it too. Friend panels are hidden for this shot so
+		// they don't cover the chat.
+		context.getInput().lookAt(new BlockPos(16, -59, -17));
 		context.runOnClient(mc -> PapouConfig.get().panelsEnabled = false);
 		context.waitTicks(110);
-		context.runOnClient(mc -> DeathMarker.elapsedTicks = DeathMarker.MESSAGE_INTERVAL_TICKS - 1);
+		context.runOnClient(mc -> DeathMarker.markers.get(1).agedTicks = DeathMarker.MESSAGE_INTERVAL_TICKS - 1);
 		context.waitTicks(5);
 		context.takeScreenshot(options("death-marker"));
 		context.runOnClient(mc -> PapouConfig.get().panelsEnabled = true);
 
-		context.runOnClient(mc -> DeathMarker.elapsedTicks = DeathMarker.DURATION_TICKS - 1);
+		// Far from both spots, beyond the simulation distance, the items stop aging, and so do the skulls.
+		world.getServer().runCommand("tp @a 1000 -60 1000");
+		world.getConnection().waitForClientboundPackets();
+		context.waitTicks(20);
+		int[] before = context.computeOnClient(mc -> new int[] {
+				DeathMarker.markers.get(0).agedTicks, DeathMarker.markers.get(1).agedTicks});
+		context.waitTicks(40);
+		int[] after = context.computeOnClient(mc -> new int[] {
+				DeathMarker.markers.get(0).agedTicks, DeathMarker.markers.get(1).agedTicks});
+		if (before[0] != after[0] || before[1] != after[1]) {
+			throw new AssertionError("Skulls aged while nobody was near their items");
+		}
+
+		// Back next to the second spot (its chunk, and items, load again), then its items go: the yellow
+		// skull goes away as picked up.
+		world.getServer().runCommand("tp @a 8 -60 -21");
+		world.getConnection().waitForClientboundPackets();
+		context.waitTicks(20);
+		world.getServer().runCommand("kill @e[type=item,x=8,y=-60,z=-24,distance=..10]");
+		context.waitFor(mc -> DeathMarker.markers.size() == 1
+				&& DeathMarker.markers.get(0).color == DeathMarker.Color.RED, 20 * 10);
+
+		// The red skull ages while its items do (the player is near): after 5 minutes it's gone.
+		context.runOnClient(mc -> DeathMarker.markers.get(0).agedTicks = DeathMarker.DURATION_TICKS - 1);
 		context.waitTicks(3);
 		boolean stillThere = context.computeOnClient(
-				mc -> DeathMarker.deathPos != null || mc.getConnection().getWaypointManager().hasWaypoints());
+				mc -> !DeathMarker.markers.isEmpty() || mc.getConnection().getWaypointManager().hasWaypoints());
 		if (stillThere) {
 			throw new AssertionError("Death marker still shown after 5 minutes");
 		}
+	}
+
+	/** Gives the player something to drop, kills them at {@code spot} and respawns. */
+	private static void die(ClientGameTestContext context, TestSingleplayerContext world, BlockPos spot, int markersAfter) {
+		world.getServer().runCommand("give @a minecraft:cobblestone 32");
+		world.getServer().runCommand("tp @a " + spot.getX() + " " + spot.getY() + " " + spot.getZ());
+		world.getConnection().waitForClientboundPackets();
+		context.waitTicks(5);
+		world.getServer().runCommand("kill @a");
+		context.waitForScreen(DeathScreen.class);
+		context.runOnClient(mc -> mc.player.respawn());
+		context.waitFor(mc -> mc.player != null && mc.player.isAlive() && DeathMarker.markers.size() == markersAfter);
+		context.setScreen(() -> null);
 	}
 
 	/**

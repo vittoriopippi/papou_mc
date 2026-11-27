@@ -1,5 +1,6 @@
 package com.giulio.papouhud;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -10,11 +11,22 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractFurnaceScreen;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.EnchantmentEffectComponents;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 
 /**
- * Sulla riga del titolo di fornace/affumicatoio/altoforno, a destra, l'XP accumulata (es. "15.4 XP"),
- * scritta come il titolo stesso. Passandoci sopra col mouse compare una spiegazione.
+ * Sulla riga del titolo di fornace/affumicatoio/altoforno, a destra, l'XP accumulata (es. "15.4 XP") e,
+ * sulla riga sotto, il livello a cui arriveresti prendendola ("→ lv 23"), scritti come il titolo stesso.
+ * Su una riga sola il testo finirebbe sopra il titolo, che e' centrato. Passandoci sopra col mouse
+ * compare una spiegazione.
+ *
+ * <p>Il gioco da' la parte intera dell'XP piu' 1 punto con probabilita' pari ai decimali: il livello e'
+ * calcolato sulla parte intera. Se addosso o in mano c'e' un oggetto danneggiato con Riparazione
+ * (Mending), l'XP serve prima a ripararlo: il livello raggiunto sara' piu' basso, e il tooltip lo dice.
  */
 final class FurnaceXpOverlay {
 	/**
@@ -24,6 +36,8 @@ final class FurnaceXpOverlay {
 	private static final int GUI_WIDTH = 176;
 	private static final int RIGHT_MARGIN = 8;
 	private static final int TEXT_Y = 6;
+	/** Seconda riga (il livello): tra il titolo e lo slot del risultato, che inizia a y = 35. */
+	private static final int LEVEL_Y = TEXT_Y + 11;
 	/** Stesso grigio scuro, senza ombra, dei titoli dei contenitori. */
 	private static final int LABEL_COLOR = 0xFF404040;
 
@@ -59,6 +73,18 @@ final class FurnaceXpOverlay {
 		return String.format(Locale.ROOT, "%.1f", rounded);
 	}
 
+	/** Un oggetto addosso o in mano, danneggiato, con Riparazione (Mending): l'XP raccolta va prima a lui. */
+	static boolean hasDamagedMendingGear(LocalPlayer player) {
+		for (EquipmentSlot slot : EquipmentSlot.values()) {
+			ItemStack stack = player.getItemBySlot(slot);
+			if (!stack.isEmpty() && stack.isDamaged()
+					&& EnchantmentHelper.has(stack, EnchantmentEffectComponents.REPAIR_WITH_XP)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	private static void draw(AbstractFurnaceScreen<?> screen, GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
 		float stored = xp;
 		if (screen.getMenu().containerId != containerId || stored <= 0.0f) {
@@ -66,18 +92,38 @@ final class FurnaceXpOverlay {
 		}
 
 		Font font = Minecraft.getInstance().font;
+		LocalPlayer player = Minecraft.getInstance().player;
+		double after = player == null ? -1
+				: XpLevels.levelAfter(player.experienceLevel, player.experienceProgress, (int) Math.floor(stored));
 		Component text = Component.translatable("papouhud.furnace.xp", format(stored));
+		int right = screen.leftPos + GUI_WIDTH - RIGHT_MARGIN;
 		int width = font.width(text);
-		int left = screen.leftPos + GUI_WIDTH - RIGHT_MARGIN - width;
 		int top = screen.topPos + TEXT_Y;
-		graphics.text(font, text, left, top, LABEL_COLOR, false);
+		graphics.text(font, text, right - width, top, LABEL_COLOR, false);
+		int bottom = top + 10;
+		if (after >= 0) {
+			Component level = Component.translatable("papouhud.furnace.level", (int) after);
+			int levelWidth = font.width(level);
+			graphics.text(font, level, right - levelWidth, screen.topPos + LEVEL_Y, LABEL_COLOR, false);
+			width = Math.max(width, levelWidth);
+			bottom = screen.topPos + LEVEL_Y + 10;
+		}
+		int left = right - width;
 
-		if (mouseX >= left - 1 && mouseX < left + width + 1 && mouseY >= top - 2 && mouseY < top + 10) {
-			graphics.setComponentTooltipForNextFrame(font, List.of(
-					Component.translatable("papouhud.furnace.tooltip.title"),
-					Component.translatable("papouhud.furnace.tooltip.points", format(stored)).withStyle(ChatFormatting.GRAY),
-					Component.translatable("papouhud.furnace.tooltip.hint").withStyle(ChatFormatting.GRAY)),
-					mouseX, mouseY);
+		if (mouseX >= left - 1 && mouseX < right + 1 && mouseY >= top - 2 && mouseY < bottom) {
+			List<Component> lines = new ArrayList<>();
+			lines.add(Component.translatable("papouhud.furnace.tooltip.title"));
+			lines.add(Component.translatable("papouhud.furnace.tooltip.points", format(stored)).withStyle(ChatFormatting.GRAY));
+			if (after >= 0) {
+				int percent = (int) Math.floor((after - Math.floor(after)) * 100.0);
+				lines.add(Component.translatable("papouhud.furnace.tooltip.level",
+						player.experienceLevel, (int) after, percent).withStyle(ChatFormatting.GRAY));
+				if (hasDamagedMendingGear(player)) {
+					lines.add(Component.translatable("papouhud.furnace.tooltip.mending").withStyle(ChatFormatting.YELLOW));
+				}
+			}
+			lines.add(Component.translatable("papouhud.furnace.tooltip.hint").withStyle(ChatFormatting.GRAY));
+			graphics.setComponentTooltipForNextFrame(font, lines, mouseX, mouseY);
 		}
 	}
 }
