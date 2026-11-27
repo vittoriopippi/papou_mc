@@ -34,8 +34,6 @@
 	"papouhud.furnace.tooltip.mending": "Gli oggetti con Riparazione danneggiati che hai addosso si riparano prima: arriverai piu' in basso",
 	"papouhud.furnace.tooltip.hint": "La ottieni quando ritiri il prodotto",
 	"papouhud.death.died": "Sei morto a %s (%s): %s sulla locator bar.",
-	"papouhud.death.reminder": "%s: a %s blocchi (%s). Gli oggetti spariscono tra %s min.",
-	"papouhud.death.reminder_other_dimension": "%s: in %s (%s). Gli oggetti spariscono tra %s min.",
 	"papouhud.death.expired": "%s rimosso: sono passati 5 minuti, gli oggetti sono spariti.",
 	"papouhud.dimension.minecraft.overworld": "Overworld",
 	"papouhud.dimension.minecraft.the_nether": "Nether",

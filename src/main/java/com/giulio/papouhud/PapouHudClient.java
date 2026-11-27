@@ -23,7 +23,8 @@ import net.minecraft.util.Mth;
  *    e la dimensione dell'HUD (pannelli, bussola e coordinate; vedi PapouConfig.hudScale);
  *  - all'avvio, un popup se su GitHub c'e' una versione piu' recente (vedi UpdateChecker);
  *  - nelle fornaci, l'XP accumulata (vedi FurnaceXpOverlay e, lato server, FurnaceXpSync);
- *  - dopo la morte, un teschio sulla locator bar e promemoria in chat per 5 minuti (vedi DeathMarker);
+ *  - dopo ogni morte, un teschio colorato sulla locator bar e, in alto a destra, un'icona come quella degli
+ *    effetti con il tempo che resta agli oggetti caduti (vedi DeathMarker e DeathMarkerHud);
  *  - sui server, le schede creative gia' pronte, cosi' Inventory Sorter ordina per categoria (vedi CreativeTabs).
  */
 public class PapouHudClient implements ClientModInitializer {
@@ -46,6 +47,7 @@ public class PapouHudClient implements ClientModInitializer {
 		RemotePlayers.register();
 		ClientTickEvents.END_CLIENT_TICK.register(DeathMarker::tick);
 		CreativeTabs.register();
+		DeathMarkerHud.register();
 
 		HudElementRegistry.attachElementAfter(
 				VanillaHudElements.CHAT,

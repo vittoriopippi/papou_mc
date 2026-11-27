@@ -165,8 +165,9 @@ public class ScreenshotGameTest implements FabricClientGameTest {
 	}
 
 	/**
-	 * Die at a known spot, respawn, and check that the skull waypoint points there; capture the
-	 * locator bar with the chat reminders, then fast-forward past the 5 minutes and check it is gone.
+	 * Die at two known spots: two skulls, red and yellow, on the locator bar and as timers in the top
+	 * right (screenshot). Then check that the timers stop far from the spots, that a skull goes away
+	 * when its items are gone, and that one goes away after its 5 minutes.
 	 */
 	private static void deathMarker(ClientGameTestContext context, TestSingleplayerContext world) {
 		BlockPos first = new BlockPos(25, -60, -10);
@@ -189,16 +190,17 @@ public class ScreenshotGameTest implements FabricClientGameTest {
 		}
 
 		// After respawning, vanilla shows the XP bar for 100 ticks before the locator bar comes back.
-		// Look between the two spots so both skulls sit on the locator bar, then jump to the yellow
-		// one's 1-minute reminder so the chat shows it too. Friend panels are hidden for this shot so
-		// they don't cover the chat.
+		// Look between the two spots so both skulls sit on the locator bar; the skulls' timers show in
+		// the top right, next to a real harmful effect. Friend panels are hidden for this shot so they
+		// don't cover the chat.
 		context.getInput().lookAt(new BlockPos(16, -59, -17));
 		context.runOnClient(mc -> PapouConfig.get().panelsEnabled = false);
+		world.getServer().runCommand("effect give @a minecraft:mining_fatigue 600 0");
+		context.runOnClient(mc -> DeathMarker.markers.get(0).agedTicks = 72 * 20);
 		context.waitTicks(110);
-		context.runOnClient(mc -> DeathMarker.markers.get(1).agedTicks = DeathMarker.MESSAGE_INTERVAL_TICKS - 1);
-		context.waitTicks(5);
 		context.takeScreenshot(options("death-marker"));
 		context.runOnClient(mc -> PapouConfig.get().panelsEnabled = true);
+		world.getServer().runCommand("effect clear @a");
 
 		// Far from both spots, beyond the simulation distance, the items stop aging, and so do the skulls.
 		world.getServer().runCommand("tp @a 1000 -60 1000");
@@ -212,6 +214,10 @@ public class ScreenshotGameTest implements FabricClientGameTest {
 		if (before[0] != after[0] || before[1] != after[1]) {
 			throw new AssertionError("Skulls aged while nobody was near their items");
 		}
+		// The timers show as paused (grey).
+		if (context.computeOnClient(mc -> DeathMarker.markers.stream().anyMatch(marker -> marker.running))) {
+			throw new AssertionError("A skull's timer shows as running with nobody near its items");
+		}
 
 		// Back next to the second spot (its chunk, and items, load again), then its items go: the yellow
 		// skull goes away as picked up.
@@ -221,6 +227,8 @@ public class ScreenshotGameTest implements FabricClientGameTest {
 		world.getServer().runCommand("kill @e[type=item,x=8,y=-60,z=-24,distance=..10]");
 		context.waitFor(mc -> DeathMarker.markers.size() == 1
 				&& DeathMarker.markers.get(0).color == DeathMarker.Color.RED, 20 * 10);
+		// Near the red spot again: its timer runs again.
+		context.waitFor(mc -> DeathMarker.markers.get(0).running, 20 * 10);
 
 		// The red skull ages while its items do (the player is near): after 5 minutes it's gone.
 		context.runOnClient(mc -> DeathMarker.markers.get(0).agedTicks = DeathMarker.DURATION_TICKS - 1);

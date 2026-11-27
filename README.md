@@ -92,11 +92,12 @@ On a server without the mod the XP line simply doesn't appear, and everything el
 
 When you die, a skull appears on the locator bar (the bar above the hotbar that shows other players). It points to the exact spot where you died, so you can walk back and pick up your items. Each death gets its own skull, in its own color (red, yellow, aqua, purple, green, orange), so if you die again on the way back you can find both spots. Up to 6 are kept; a seventh death replaces the oldest.
 
-![Two skulls on the locator bar and a death reminder in chat](docs/screenshots/death-marker.png)
+![Two skulls on the locator bar, their timers in the top right next to a harmful effect, and the death messages in chat](docs/screenshots/death-marker.png)
 
 - **How long:** a skull lasts as long as the items you dropped. In Minecraft, items on the ground vanish after 5 minutes, but their clock only runs while the chunk they are in is simulated, i.e. while a player is within the server's **simulation distance** (counted in chunks; 6 chunks, about 100 blocks, on a server set to 6). Far from everyone, or with the game paused in singleplayer, the items wait. The skulls follow the same rule: their 5 minutes only run while you, or a friend the server tells Papou HUD about, are close enough. The time you spend on the death screen counts too, because your body is still there.
+- **Timer in the top right:** each skull also shows up like a harmful status effect, next to the real ones: the skull in its color, with the time its items have left below it ("4:32"). While nobody is near the items the timer is paused: the skull fades and the time turns grey. In the last 30 seconds the time turns red. It follows the HUD size set in the menu.
 - **Picked up:** when you get within a few blocks of a skull and no items are left on the ground around it (you picked them up, or they burned), the skull goes away.
-- **Chat:** right after you respawn, the chat shows where you died and which skull points there. While a skull's clock is running, every minute it says how far away it is and how many minutes the items have left. When a skull goes away, the chat says why.
+- **Chat:** right after you respawn, the chat shows where you died and which skull points there. When a skull goes away, the chat says why.
 - **Leaving the game:** the skulls are saved per server or world (in `config/papouhud-deaths.json`) and come back when you return, with a chat line listing them. The items are still there too, since nobody was near them.
 - **Other dimensions:** each skull only shows in the dimension where you died.
 - **Locator bar:** right after respawning, the game shows the XP bar for a few seconds before switching back to the locator bar.

@@ -47,7 +47,9 @@ import net.minecraft.world.waypoints.WaypointStyleAssets;
 
 /**
  * Dopo ogni morte: un teschio sulla locator bar (la barra che indica gli altri giocatori) punta al
- * luogo della morte, con messaggi in chat. Una morte = un teschio di un altro colore, fino a 6.
+ * luogo della morte, con messaggi in chat. Una morte = un teschio di un altro colore, fino a 6. In alto a
+ * destra, accanto agli effetti negativi, ogni teschio ha anche un'icona con il tempo che resta ai suoi
+ * oggetti (vedi DeathMarkerHud).
  *
  * <p>Il teschio dura quanto gli oggetti caduti. Nel gioco un oggetto a terra sparisce dopo 5 minuti
  * (6000 tick) passati in un chunk "simulato", cioe' entro la distanza di simulazione del server da un
@@ -62,7 +64,6 @@ import net.minecraft.world.waypoints.WaypointStyleAssets;
  */
 final class DeathMarker {
 	static final int DURATION_TICKS = 5 * 60 * 20;
-	static final int MESSAGE_INTERVAL_TICKS = 60 * 20;
 	/** A meno di questi blocchi dal punto si controlla se gli oggetti ci sono ancora. */
 	static final double COLLECT_CHECK_RANGE = 6.0;
 	/** Raggio, in blocchi, intorno al punto in cui cercare gli oggetti caduti. */
@@ -114,6 +115,8 @@ final class DeathMarker {
 		int agedTicks;
 		/** Tick di fila in cui, da vicino, non si e' visto nessun oggetto intorno al punto. */
 		int emptyTicks;
+		/** Se all'ultimo tick il conto stava andando (qualcuno vicino agli oggetti): l'icona lo mostra. */
+		boolean running;
 		final TrackedWaypoint waypoint;
 
 		Marker(GlobalPos pos, Color color, int agedTicks) {
@@ -218,7 +221,8 @@ final class DeathMarker {
 		boolean aging = false;
 		for (Iterator<Marker> it = markers.iterator(); it.hasNext(); ) {
 			Marker marker = it.next();
-			if (isSimulated(player, marker.pos, simulation)) {
+			marker.running = isSimulated(player, marker.pos, simulation);
+			if (marker.running) {
 				aging = true;
 				marker.agedTicks++;
 				if (marker.agedTicks >= DURATION_TICKS) {
@@ -227,9 +231,6 @@ final class DeathMarker {
 					changed = true;
 					player.sendSystemMessage(message(Component.translatable("papouhud.death.expired", marker.color.label())));
 					continue;
-				}
-				if (marker.agedTicks % MESSAGE_INTERVAL_TICKS == 0) {
-					remind(player, marker);
 				}
 			}
 
@@ -293,18 +294,10 @@ final class DeathMarker {
 		return player.level().getEntitiesOfClass(ItemEntity.class, area).isEmpty();
 	}
 
-	private static void remind(LocalPlayer player, Marker marker) {
-		int minutesLeft = (DURATION_TICKS - marker.agedTicks + MESSAGE_INTERVAL_TICKS - 1) / MESSAGE_INTERVAL_TICKS;
-		BlockPos pos = marker.pos.pos();
-		Component text;
-		if (player.level().dimension() == marker.pos.dimension()) {
-			int distance = (int) Math.round(Math.sqrt(player.blockPosition().distSqr(pos)));
-			text = Component.translatable("papouhud.death.reminder", marker.color.label(), distance, coordinates(pos), minutesLeft);
-		} else {
-			text = Component.translatable("papouhud.death.reminder_other_dimension", marker.color.label(),
-					dimensionName(marker.pos.dimension()), coordinates(pos), minutesLeft);
-		}
-		player.sendSystemMessage(message(text));
+	/** Tempo che resta agli oggetti, come la durata degli effetti: "4:32", "0:07". */
+	static String timeLeft(Marker marker) {
+		int seconds = (DURATION_TICKS - marker.agedTicks + 19) / 20;
+		return seconds / 60 + ":" + String.format(java.util.Locale.ROOT, "%02d", seconds % 60);
 	}
 
 	/** Mostra ogni teschio solo nella sua dimensione (altrove la direzione non avrebbe senso), e non da morti. */

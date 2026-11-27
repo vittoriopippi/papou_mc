@@ -34,8 +34,6 @@
 	"papouhud.furnace.tooltip.mending": "Damaged Mending gear on you gets repaired first: you will reach a lower level",
 	"papouhud.furnace.tooltip.hint": "You get it when you take the output",
 	"papouhud.death.died": "You died at %s (%s): %s on the locator bar.",
-	"papouhud.death.reminder": "%s: %s blocks away (%s). The items vanish in %s min.",
-	"papouhud.death.reminder_other_dimension": "%s: in %s (%s). The items vanish in %s min.",
 	"papouhud.death.expired": "%s removed: 5 minutes have passed, the items are gone.",
 	"papouhud.dimension.minecraft.overworld": "the Overworld",
 	"papouhud.dimension.minecraft.the_nether": "the Nether",
