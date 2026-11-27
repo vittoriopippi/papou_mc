@@ -92,6 +92,12 @@ public class ScreenshotGameTest implements FabricClientGameTest {
 			context.takeScreenshot(options("settings"));
 			context.setScreen(() -> null);
 
+			// HUD size: the panels, compass and coordinates at 60% (not a README screenshot).
+			context.runOnClient(mc -> PapouConfig.get().hudScale = 60);
+			context.waitTicks(2);
+			context.takeScreenshot(options("hud-60"));
+			context.runOnClient(mc -> PapouConfig.get().hudScale = 100);
+
 			farFriends(context);
 
 			furnaceXp(context, world);

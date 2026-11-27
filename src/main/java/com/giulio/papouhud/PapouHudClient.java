@@ -19,7 +19,8 @@ import net.minecraft.util.Mth;
  *    di caricamento; se il server ha Papou HUD (o il plugin Paper) manda anche gli altri (vedi
  *    PlayersSync e RemotePlayers);
  *  - una bussola in alto con direzione e punti cardinali, e sotto le coordinate XYZ;
- *  - un menu (tasto configurabile) per attivare/disattivare gli elementi e scegliere le scorciatoie;
+ *  - un menu (tasto configurabile) per attivare/disattivare gli elementi, scegliere le scorciatoie
+ *    e la dimensione dell'HUD (pannelli, bussola e coordinate; vedi PapouConfig.hudScale);
  *  - all'avvio, un popup se su GitHub c'e' una versione piu' recente (vedi UpdateChecker);
  *  - nelle fornaci, l'XP accumulata (vedi FurnaceXpOverlay e, lato server, FurnaceXpSync);
  *  - dopo la morte, un teschio sulla locator bar e promemoria in chat per 5 minuti (vedi DeathMarker);
@@ -95,11 +96,26 @@ public class PapouHudClient implements ClientModInitializer {
 			return;
 		}
 
+		float scale = PapouConfig.get().hudScaleFactor();
+		graphics.pose().pushMatrix();
+		graphics.pose().scale(scale, scale);
 		int top = MARGIN;
 		for (PlayerPanel.Data panel : PlayerPanel.collect(mc)) {
 			PlayerPanel.draw(graphics, mc, panel, MARGIN, top);
 			top += PlayerPanel.height(panel) + PANEL_GAP;
 		}
+		graphics.pose().popMatrix();
+	}
+
+	/**
+	 * Applica la dimensione dell'HUD e restituisce la larghezza dello schermo nelle coordinate scalate,
+	 * per centrare bussola e coordinate. Va chiuso con {@code graphics.pose().popMatrix()}.
+	 */
+	private static int pushHudScale(GuiGraphicsExtractor graphics) {
+		float scale = PapouConfig.get().hudScaleFactor();
+		graphics.pose().pushMatrix();
+		graphics.pose().scale(scale, scale);
+		return Math.round(graphics.guiWidth() / scale);
 	}
 
 	private static void renderCompass(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker) {
@@ -112,7 +128,7 @@ public class PapouHudClient implements ClientModInitializer {
 		float bearing = Mth.wrapDegrees(mc.player.getYRot() + 180.0f);
 		float normalized = (bearing + 360.0f) % 360.0f;
 
-		int centerX = graphics.guiWidth() / 2;
+		int centerX = pushHudScale(graphics) / 2;
 		int top = MARGIN;
 
 		// Tacche ogni 15 gradi, lettere ogni 45.
@@ -136,6 +152,7 @@ public class PapouHudClient implements ClientModInitializer {
 		graphics.fill(centerX, top + 12, centerX + 1, top + 20, 0xFFFFFF55);
 		String degrees = Math.round(normalized) % 360 + "°";
 		graphics.text(mc.font, degrees, centerX - mc.font.width(degrees) / 2, top + 22, 0xFFFFFF55, true);
+		graphics.pose().popMatrix();
 	}
 
 	private static void renderCoords(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker) {
@@ -148,6 +165,8 @@ public class PapouHudClient implements ClientModInitializer {
 		// Subito sotto i gradi della bussola; senza bussola sale in alto.
 		int y = config.compassEnabled ? MARGIN + 33 : MARGIN;
 		String text = "XYZ: " + mc.player.getBlockX() + " / " + mc.player.getBlockY() + " / " + mc.player.getBlockZ();
-		graphics.text(mc.font, text, graphics.guiWidth() / 2 - mc.font.width(text) / 2, y, 0xFFFFFFFF, true);
+		int width = pushHudScale(graphics);
+		graphics.text(mc.font, text, width / 2 - mc.font.width(text) / 2, y, 0xFFFFFFFF, true);
+		graphics.pose().popMatrix();
 	}
 }

@@ -18,6 +18,10 @@ import net.fabricmc.loader.api.FabricLoader;
  */
 public final class PapouConfig {
 	public static final int NO_KEY = -1;
+	/** Dimensione dell'HUD (pannelli, bussola, coordinate) in percento: da 50 a 150, a passi di 10. */
+	public static final int MIN_HUD_SCALE = 50;
+	public static final int MAX_HUD_SCALE = 150;
+	public static final int HUD_SCALE_STEP = 10;
 	/** 3 = tasti con i codici di SDL (Minecraft 26.3): quelli salvati prima erano codici GLFW. */
 	private static final int CURRENT_VERSION = 3;
 
@@ -33,6 +37,9 @@ public final class PapouConfig {
 
 	/** Dopo la morte, teschio sulla locator bar e promemoria in chat per 5 minuti. */
 	public boolean deathMarkerEnabled = true;
+
+	/** Dimensione dell'HUD in percento (100 = normale). Cambia dal menu con - e +. */
+	public int hudScale = 100;
 
 	/** Versione del formato: se il file salvato e' piu' vecchio, le scorciatoie tornano ai valori predefiniti. */
 	public int configVersion;
@@ -64,6 +71,7 @@ public final class PapouConfig {
 						loaded.keyMenu = defaults.keyMenu;
 						loaded.configVersion = CURRENT_VERSION;
 					}
+					loaded.hudScale = clampHudScale(loaded.hudScale);
 					return loaded;
 				}
 			} catch (IOException | RuntimeException e) {
@@ -73,6 +81,15 @@ public final class PapouConfig {
 		PapouConfig fresh = new PapouConfig();
 		fresh.configVersion = CURRENT_VERSION;
 		return fresh;
+	}
+
+	static int clampHudScale(int percent) {
+		return Math.max(MIN_HUD_SCALE, Math.min(MAX_HUD_SCALE, percent));
+	}
+
+	/** Fattore di scala dell'HUD (1 = normale). */
+	public float hudScaleFactor() {
+		return clampHudScale(hudScale) / 100.0f;
 	}
 
 	public void save() {

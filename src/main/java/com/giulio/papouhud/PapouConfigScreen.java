@@ -7,11 +7,12 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.network.chat.Component;
 
-/** Menu di Papou: elementi attivi/disattivi e scorciatoie da tastiera. */
+/** Menu di Papou: elementi attivi/disattivi, scorciatoie da tastiera e dimensione dell'HUD. */
 public class PapouConfigScreen extends Screen {
 	private static final int ROW_HEIGHT = 24;
 	private static final int TOGGLE_WIDTH = 80;
 	private static final int KEY_WIDTH = 100;
+	private static final int SIZE_BUTTON_WIDTH = 20;
 
 	private final Screen parent;
 	private final PapouConfig config = PapouConfig.get();
@@ -20,6 +21,8 @@ public class PapouConfigScreen extends Screen {
 			"papouhud.element.panels", "papouhud.element.compass", "papouhud.element.coords", "papouhud.element.menu"};
 	private final Button[] toggleButtons = new Button[3];
 	private final Button[] keyButtons = new Button[4];
+	private Button smallerButton;
+	private Button biggerButton;
 	/** Indice della scorciatoia in attesa di un tasto, -1 se nessuna. */
 	private int listening = -1;
 
@@ -51,9 +54,27 @@ public class PapouConfigScreen extends Screen {
 			}).bounds(cx + 65, y, KEY_WIDTH, 20).build());
 		}
 
-		addRenderableWidget(Button.builder(Component.translatable("gui.done"), button -> onClose())
-				.bounds(cx - 100, top + elementKeys.length * ROW_HEIGHT + 24, 200, 20).build());
+		// Riga della dimensione dell'HUD: [-] 100% [+], nella colonna dei pulsanti Mostra.
+		int sizeY = top + elementKeys.length * ROW_HEIGHT;
+		smallerButton = addRenderableWidget(Button.builder(Component.literal("-"), button -> changeHudScale(-1))
+				.bounds(cx - 20, sizeY, SIZE_BUTTON_WIDTH, 20).build());
+		biggerButton = addRenderableWidget(Button.builder(Component.literal("+"), button -> changeHudScale(1))
+				.bounds(cx - 20 + TOGGLE_WIDTH - SIZE_BUTTON_WIDTH, sizeY, SIZE_BUTTON_WIDTH, 20).build());
 
+		addRenderableWidget(Button.builder(Component.translatable("gui.done"), button -> onClose())
+				.bounds(cx - 100, top + rows() * ROW_HEIGHT + 10, 200, 20).build());
+
+		refreshLabels();
+	}
+
+	/** Righe del menu: gli elementi piu' la dimensione dell'HUD. */
+	private int rows() {
+		return elementKeys.length + 1;
+	}
+
+	private void changeHudScale(int steps) {
+		config.hudScale = PapouConfig.clampHudScale(config.hudScale + steps * PapouConfig.HUD_SCALE_STEP);
+		config.save();
 		refreshLabels();
 	}
 
@@ -92,6 +113,8 @@ public class PapouConfigScreen extends Screen {
 	}
 
 	private void refreshLabels() {
+		smallerButton.active = config.hudScale > PapouConfig.MIN_HUD_SCALE;
+		biggerButton.active = config.hudScale < PapouConfig.MAX_HUD_SCALE;
 		for (int i = 0; i < toggleButtons.length; i++) {
 			toggleButtons[i].setMessage(Component.translatable(
 					isEnabled(i) ? "papouhud.config.on" : "papouhud.config.off"));
@@ -143,8 +166,12 @@ public class PapouConfigScreen extends Screen {
 					cx - 160, top + i * ROW_HEIGHT + 6, 0xFFFFFFFF, true);
 		}
 
+		int sizeY = top + elementKeys.length * ROW_HEIGHT;
+		graphics.text(this.font, Component.translatable("papouhud.config.size"), cx - 160, sizeY + 6, 0xFFFFFFFF, true);
+		graphics.centeredText(this.font, Component.literal(config.hudScale + "%"), cx + 20, sizeY + 6, 0xFFFFFFFF);
+
 		graphics.centeredText(this.font, Component.translatable("papouhud.config.hint"),
-				cx, top + elementKeys.length * ROW_HEIGHT + 52, 0xFF888888);
+				cx, top + rows() * ROW_HEIGHT + 38, 0xFF888888);
 	}
 
 	@Override

@@ -42,7 +42,7 @@ Everything works on any server, including vanilla ones, with nothing installed s
 
 Shortcuts only fire while you are in game with no screen open. Toggling an element shows a short ON/OFF message above the hotbar.
 
-In the settings menu, click a shortcut and press the new key. `Delete` or `Backspace` clears it (no key), `Esc` cancels.
+In the settings menu, click a shortcut and press the new key. `Delete` or `Backspace` clears it (no key), `Esc` cancels. The **HUD size** row makes the friend panels, compass and coordinates smaller (`-`) or bigger (`+`), from 50% to 150%; the rest of the game's interface stays as it is.
 
 ![Settings menu with display toggles and shortcuts](docs/screenshots/settings.png)
 
@@ -132,15 +132,16 @@ Settings are saved automatically to `config/papou.json` in your game directory:
   "coordsEnabled": true,
   "checkForUpdates": true,
   "deathMarkerEnabled": true,
-  "configVersion": 2,
-  "keyPanels": 72,
-  "keyCompass": 78,
-  "keyCoords": 74,
-  "keyMenu": 77
+  "hudScale": 100,
+  "configVersion": 3,
+  "keyPanels": 11,
+  "keyCompass": 17,
+  "keyCoords": 13,
+  "keyMenu": 16
 }
 ```
 
-Keys are GLFW key codes; `-1` means no key. If the file is missing or unreadable, the defaults are used.
+`hudScale` is the size of the friend panels, compass and coordinates in percent, from 50 to 150 (the `-` and `+` buttons in the settings menu change it by 10). Keys use Minecraft's key codes, which since Minecraft 26.3 are SDL scancodes (e.g. `M` = 16); `-1` means no key. If the file is missing or unreadable, the defaults are used.
 
 The mod is translated into English and Italian.
 

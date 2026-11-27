@@ -12,6 +12,7 @@
 	"papouhud.config.press": "> premi un tasto <",
 	"papouhud.config.column_show": "Mostra",
 	"papouhud.config.column_key": "Scorciatoia",
+	"papouhud.config.size": "Dimensione HUD",
 	"papouhud.config.hint": "Clicca una scorciatoia, poi premi il nuovo tasto. Canc = nessuno, Esc = annulla.",
 	"papouhud.update.title": "Aggiornamento di Papou HUD disponibile",
 	"papouhud.update.message": "E' uscita la versione %s (hai la %s). Scaricarla ora? Verra' installata quando chiudi il gioco.",
