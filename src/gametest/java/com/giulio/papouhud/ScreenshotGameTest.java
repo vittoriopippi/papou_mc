@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.UUID;
 
 import com.mojang.authlib.GameProfile;
+import com.mojang.blaze3d.platform.InputConstants;
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContext;
@@ -78,7 +79,14 @@ public class ScreenshotGameTest implements FabricClientGameTest {
 			context.waitTicks(240);
 			context.takeScreenshot(options("hud"));
 
-			context.setScreen(() -> new PapouConfigScreen(null));
+			// The shortcuts, with their default keys: H hides the friend panels and shows them again,
+			// M opens the menu. (Keys are SDL scancodes since 26.3: GLFW's M, 77, is End there.)
+			tapKey(context, InputConstants.KEY_H);
+			context.waitFor(mc -> !PapouConfig.get().panelsEnabled, 20);
+			tapKey(context, InputConstants.KEY_H);
+			context.waitFor(mc -> PapouConfig.get().panelsEnabled, 20);
+			tapKey(context, InputConstants.KEY_M);
+			context.waitForScreen(PapouConfigScreen.class);
 			// Opening a pausing screen autosaves: wait for the "Saving world" notice to go away.
 			context.waitTicks(80);
 			context.takeScreenshot(options("settings"));
@@ -280,6 +288,17 @@ public class ScreenshotGameTest implements FabricClientGameTest {
 
 	private static ResourceKey<Recipe<?>> recipe(String id) {
 		return ResourceKey.create(Registries.RECIPE, Identifier.withDefaultNamespace(id));
+	}
+
+	/**
+	 * Holds a key for a couple of ticks, like a real press. The shortcuts are polled once per tick, and
+	 * {@code pressKey} releases the key before the next tick runs.
+	 */
+	private static void tapKey(ClientGameTestContext context, int key) {
+		context.getInput().holdKey(key);
+		context.waitTicks(2);
+		context.getInput().releaseKey(key);
+		context.waitTick();
 	}
 
 	private static TestScreenshotOptions options(String name) {

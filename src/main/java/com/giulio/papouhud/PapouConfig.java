@@ -8,12 +8,18 @@ import java.nio.file.Path;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.mojang.blaze3d.platform.InputConstants;
 import net.fabricmc.loader.api.FabricLoader;
 
-/** Impostazioni di Papou, salvate in config/papou.json. Tasto -1 = nessun tasto. */
+/**
+ * Impostazioni di Papou, salvate in config/papou.json. Tasto -1 = nessun tasto.
+ * I tasti sono numerati come in {@link InputConstants}: da Minecraft 26.3 sono gli scancode di SDL
+ * (M = 16), non piu' i codici di GLFW (M = 77, che per SDL e' il tasto Fine).
+ */
 public final class PapouConfig {
 	public static final int NO_KEY = -1;
-	private static final int CURRENT_VERSION = 2;
+	/** 3 = tasti con i codici di SDL (Minecraft 26.3): quelli salvati prima erano codici GLFW. */
+	private static final int CURRENT_VERSION = 3;
 
 	private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 	private static final Path FILE = FabricLoader.getInstance().getConfigDir().resolve("papou.json");
@@ -31,10 +37,10 @@ public final class PapouConfig {
 	/** Versione del formato: se il file salvato e' piu' vecchio, le scorciatoie tornano ai valori predefiniti. */
 	public int configVersion;
 
-	public int keyPanels = 72; // H
-	public int keyCompass = 78; // N
-	public int keyCoords = 74; // J
-	public int keyMenu = 77; // M
+	public int keyPanels = InputConstants.KEY_H;
+	public int keyCompass = InputConstants.KEY_N;
+	public int keyCoords = InputConstants.KEY_J;
+	public int keyMenu = InputConstants.KEY_M;
 
 	private static PapouConfig instance;
 

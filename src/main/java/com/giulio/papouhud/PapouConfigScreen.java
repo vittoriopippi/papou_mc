@@ -12,9 +12,6 @@ public class PapouConfigScreen extends Screen {
 	private static final int ROW_HEIGHT = 24;
 	private static final int TOGGLE_WIDTH = 80;
 	private static final int KEY_WIDTH = 100;
-	private static final int GLFW_KEY_ESCAPE = 256;
-	private static final int GLFW_KEY_BACKSPACE = 259;
-	private static final int GLFW_KEY_DELETE = 261;
 
 	private final Screen parent;
 	private final PapouConfig config = PapouConfig.get();
@@ -116,10 +113,10 @@ public class PapouConfigScreen extends Screen {
 	public boolean keyPressed(KeyEvent event) {
 		if (listening >= 0) {
 			int key = event.key();
-			if (key == GLFW_KEY_DELETE || key == GLFW_KEY_BACKSPACE) {
+			if (key == InputConstants.KEY_DELETE || key == InputConstants.KEY_BACKSPACE) {
 				setKey(listening, PapouConfig.NO_KEY);
 				config.save();
-			} else if (key != GLFW_KEY_ESCAPE) {
+			} else if (key != InputConstants.KEY_ESCAPE) {
 				setKey(listening, key);
 				config.save();
 			}
