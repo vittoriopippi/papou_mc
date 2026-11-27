@@ -2,7 +2,7 @@ name: PapouHud
 version: '${version}'
 main: com.giulio.papouhud.paper.PapouHudPaper
 api-version: '1.21.8'
-description: Papou HUD on Paper. Sends every player's health, armor and position to players with the Papou HUD mod, and shows friend bars to everyone else (Bedrock players too).
+description: Papou HUD on Paper. Sends every player's health, armor and position, and the XP stored in the furnace they open, to players with the Papou HUD mod, and shows friend bars to everyone else (Bedrock players too).
 authors: [Giulio]
 commands:
   papou:

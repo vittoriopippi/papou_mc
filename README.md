@@ -9,6 +9,7 @@ A client-side [Fabric](https://fabricmc.net/) mod for Minecraft that adds a smal
 - **Furnace XP** – furnaces, smokers and blast furnaces show how much XP they are holding, and the level you would reach by taking it, next to their title.
 - **Death markers** – after each death, a skull of its own color on the locator bar points to where you died, for as long as your dropped items last, with reminders in chat.
 - **Inventory Sorter on any server** – with [Inventory Sorter](https://modrinth.com/mod/inventory-sorting) set to "Sort by: Category", chests are sorted by category on servers without Inventory Sorter too, such as Paper (see [Inventory Sorter](#inventory-sorter)).
+- **Mob health** – nearby mobs show their health in hearts over their heads.
 - **Update check** – when a new version is released, a popup at startup offers to install it.
 
 ![Friend panels in the top-left corner, compass and coordinates at the top](docs/screenshots/hud.png)
@@ -85,8 +86,9 @@ Stored XP only exists on the server: the game never sends it to players. Papou H
 - **Singleplayer** works out of the box.
 - **Hosting with Essential or Open to LAN**: the world runs inside the host's game, so it works as long as the **host** has Papou HUD. Each friend also needs the mod to see the number.
 - **Dedicated server**: install Papou HUD in the server's `mods` folder as well.
+- **Paper server**: the Papou HUD plugin (`papouhud-paper-<version>.jar`, 1.4.6 or later) sends it too.
 
-On a server without the mod the XP line simply doesn't appear, and everything else keeps working. The Paper plugin doesn't send it either. The value is the exact total; when you take the output, the game rounds any fraction randomly (e.g. 15.4 gives 15 XP, or 16 with a 40% chance).
+On a server without the mod or the plugin the XP line simply doesn't appear, and everything else keeps working. The value is the exact total; when you take the output, the game rounds any fraction randomly (e.g. 15.4 gives 15 XP, or 16 with a 40% chance).
 
 ## Death marker
 
@@ -103,6 +105,18 @@ When you die, a skull appears on the locator bar (the bar above the hotbar that 
 - **Locator bar:** right after respawning, the game shows the XP bar for a few seconds before switching back to the locator bar.
 
 Everything happens in your own game, so it works on any server and with Essential. To turn it off, set `"deathMarkerEnabled": false` in the config file.
+
+## Mob health
+
+Mobs within 20 blocks show their health over their heads, in hearts like your own health bar: a heart for every 2 health points, half a heart for an odd one, empty hearts for what they've lost. Mobs with more than 10 hearts (an Enderman, an Iron Golem) would need a very long row, so they show one heart and the numbers instead, still in hearts (e.g. "31.5/50").
+
+![Health in hearts over a cow, a named pig, a husk and an Iron Golem](docs/screenshots/mob-health.png)
+
+- If the mob has a name, the hearts sit above it.
+- The hearts don't show through walls, so they don't give away mobs you can't see. Invisible mobs show nothing.
+- Turn it on or off in the settings menu (`M`), row **Mob health**.
+
+Everything happens in your own game, so it works on any server.
 
 ## Inventory Sorter
 
@@ -136,6 +150,7 @@ Settings are saved automatically to `config/papou.json` in your game directory:
   "coordsEnabled": true,
   "checkForUpdates": true,
   "deathMarkerEnabled": true,
+  "mobHealthEnabled": true,
   "hudScale": 100,
   "configVersion": 3,
   "keyPanels": 11,
@@ -157,7 +172,7 @@ You need JDK 25. Then:
 ./gradlew build
 ```
 
-The mod jar is written to `build/libs/papouhud-<version>.jar` and the Paper plugin to `paper/build/libs/papouhud-paper-<version>.jar`. `build` also runs the unit tests (`./gradlew test`), which check that the mod and the plugin write the friends packet byte for byte the same way, against [`src/test/resources/players-v1.hex`](src/test/resources/players-v1.hex). To start a development client with the mod loaded:
+The mod jar is written to `build/libs/papouhud-<version>.jar` and the Paper plugin to `paper/build/libs/papouhud-paper-<version>.jar`. `build` also runs the unit tests (`./gradlew test`), which check that the mod and the plugin write the friends and furnace XP packets byte for byte the same way, against [`src/test/resources/players-v1.hex`](src/test/resources/players-v1.hex) and [`src/test/resources/furnace-xp-v1.hex`](src/test/resources/furnace-xp-v1.hex). To start a development client with the mod loaded:
 
 ```bash
 ./gradlew runClient

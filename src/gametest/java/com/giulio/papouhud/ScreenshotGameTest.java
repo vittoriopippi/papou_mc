@@ -98,6 +98,8 @@ public class ScreenshotGameTest implements FabricClientGameTest {
 			context.takeScreenshot(options("hud-60"));
 			context.runOnClient(mc -> PapouConfig.get().hudScale = 100);
 
+			mobHealth(context, world);
+
 			farFriends(context);
 
 			furnaceXp(context, world);
@@ -238,6 +240,36 @@ public class ScreenshotGameTest implements FabricClientGameTest {
 		if (stillThere) {
 			throw new AssertionError("Death marker still shown after 5 minutes");
 		}
+	}
+
+	/** Mobs nearby with their health in hearts over their heads: a row of hearts, or a heart and numbers past 10. */
+	private static void mobHealth(ClientGameTestContext context, TestSingleplayerContext world) {
+		String full = "\ue000";
+		String half = "\ue001";
+		String empty = "\ue002";
+		String cow = context.computeOnClient(mc -> MobHealthLabel.text(7.0f, 10.0f).getString());
+		if (!cow.equals(full + full + full + half + empty)) {
+			throw new AssertionError("7 of 10 health should be 3 and a half hearts of 5, got " + cow);
+		}
+		String golem = context.computeOnClient(mc -> MobHealthLabel.text(63.0f, 100.0f).getString());
+		if (!golem.equals(full + " 31.5/50")) {
+			throw new AssertionError("63 of 100 health should read 31.5/50 hearts, got " + golem);
+		}
+
+		world.getServer().runCommand("summon minecraft:cow 3 -60 -5 {NoAI:1b,Health:7f,Rotation:[90f,0f]}");
+		world.getServer().runCommand("summon minecraft:pig 6 -60 -2 {NoAI:1b,CustomName:\"Bacon\",CustomNameVisible:1b,Rotation:[90f,0f]}");
+		world.getServer().runCommand("summon minecraft:husk 1 -60 -7 {NoAI:1b,Health:13f,PersistenceRequired:1b,Rotation:[180f,0f]}");
+		world.getServer().runCommand("summon minecraft:iron_golem 8 -60 -8 {NoAI:1b,Health:63f,Rotation:[135f,0f]}");
+		world.getConnection().waitForClientboundPackets();
+		context.runOnClient(mc -> PapouConfig.get().panelsEnabled = false);
+		context.getInput().lookAt(new BlockPos(4, -59, -5));
+		context.waitTicks(40);
+		context.takeScreenshot(options("mob-health"));
+		context.runOnClient(mc -> PapouConfig.get().panelsEnabled = true);
+		// Mobs, then the items they drop.
+		world.getServer().runCommand("kill @e[type=!player]");
+		world.getServer().runCommand("kill @e[type=item]");
+		context.getInput().setCursorPos(0, 0);
 	}
 
 	/** Gives the player something to drop, kills them at {@code spot} and respawns. */

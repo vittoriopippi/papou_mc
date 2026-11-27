@@ -7,7 +7,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.network.chat.Component;
 
-/** Menu di Papou: elementi attivi/disattivi, scorciatoie da tastiera e dimensione dell'HUD. */
+/** Menu di Papou: elementi attivi/disattivi, scorciatoie da tastiera, dimensione dell'HUD e vita dei mob. */
 public class PapouConfigScreen extends Screen {
 	private static final int ROW_HEIGHT = 24;
 	private static final int TOGGLE_WIDTH = 80;
@@ -23,6 +23,7 @@ public class PapouConfigScreen extends Screen {
 	private final Button[] keyButtons = new Button[4];
 	private Button smallerButton;
 	private Button biggerButton;
+	private Button mobHealthButton;
 	/** Indice della scorciatoia in attesa di un tasto, -1 se nessuna. */
 	private int listening = -1;
 
@@ -61,15 +62,22 @@ public class PapouConfigScreen extends Screen {
 		biggerButton = addRenderableWidget(Button.builder(Component.literal("+"), button -> changeHudScale(1))
 				.bounds(cx - 20 + TOGGLE_WIDTH - SIZE_BUTTON_WIDTH, sizeY, SIZE_BUTTON_WIDTH, 20).build());
 
+		// Riga della vita dei mob: solo Visibile/Nascosto, senza scorciatoia.
+		mobHealthButton = addRenderableWidget(Button.builder(Component.empty(), button -> {
+			config.mobHealthEnabled = !config.mobHealthEnabled;
+			config.save();
+			refreshLabels();
+		}).bounds(cx - 20, sizeY + ROW_HEIGHT, TOGGLE_WIDTH, 20).build());
+
 		addRenderableWidget(Button.builder(Component.translatable("gui.done"), button -> onClose())
 				.bounds(cx - 100, top + rows() * ROW_HEIGHT + 10, 200, 20).build());
 
 		refreshLabels();
 	}
 
-	/** Righe del menu: gli elementi piu' la dimensione dell'HUD. */
+	/** Righe del menu: gli elementi, la dimensione dell'HUD e la vita dei mob. */
 	private int rows() {
-		return elementKeys.length + 1;
+		return elementKeys.length + 2;
 	}
 
 	private void changeHudScale(int steps) {
@@ -115,6 +123,8 @@ public class PapouConfigScreen extends Screen {
 	private void refreshLabels() {
 		smallerButton.active = config.hudScale > PapouConfig.MIN_HUD_SCALE;
 		biggerButton.active = config.hudScale < PapouConfig.MAX_HUD_SCALE;
+		mobHealthButton.setMessage(Component.translatable(
+				config.mobHealthEnabled ? "papouhud.config.on" : "papouhud.config.off"));
 		for (int i = 0; i < toggleButtons.length; i++) {
 			toggleButtons[i].setMessage(Component.translatable(
 					isEnabled(i) ? "papouhud.config.on" : "papouhud.config.off"));
@@ -169,6 +179,8 @@ public class PapouConfigScreen extends Screen {
 		int sizeY = top + elementKeys.length * ROW_HEIGHT;
 		graphics.text(this.font, Component.translatable("papouhud.config.size"), cx - 160, sizeY + 6, 0xFFFFFFFF, true);
 		graphics.centeredText(this.font, Component.literal(config.hudScale + "%"), cx + 20, sizeY + 6, 0xFFFFFFFF);
+		graphics.text(this.font, Component.translatable("papouhud.config.mob_health"), cx - 160,
+				sizeY + ROW_HEIGHT + 6, 0xFFFFFFFF, true);
 
 		graphics.centeredText(this.font, Component.translatable("papouhud.config.hint"),
 				cx, top + rows() * ROW_HEIGHT + 38, 0xFF888888);

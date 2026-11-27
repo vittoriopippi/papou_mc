@@ -38,6 +38,9 @@ public final class PapouConfig {
 	/** Dopo la morte, teschio sulla locator bar e promemoria in chat per 5 minuti. */
 	public boolean deathMarkerEnabled = true;
 
+	/** La vita dei mob vicini, in cuori, sopra la loro testa (vedi MobHealthLabel). */
+	public boolean mobHealthEnabled = true;
+
 	/** Dimensione dell'HUD in percento (100 = normale). Cambia dal menu con - e +. */
 	public int hudScale = 100;
 

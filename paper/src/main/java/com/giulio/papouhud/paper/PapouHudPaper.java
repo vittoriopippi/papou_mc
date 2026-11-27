@@ -23,16 +23,20 @@ import org.bukkit.plugin.java.JavaPlugin;
 public final class PapouHudPaper extends JavaPlugin {
 	private static final long PACKET_INTERVAL_TICKS = 10;
 	private static final long BAR_INTERVAL_TICKS = 5;
+	/** Come FurnaceXpSync nella mod. */
+	private static final long FURNACE_INTERVAL_TICKS = 5;
 
 	/** Solo per i test: manda a ognuno anche i propri dati, cosi' basta un giocatore per provarlo. */
 	private final boolean includeSelf = Boolean.getBoolean("papouhud.debug.includeSelf");
 	/** Chi ha gia' ricevuto un elenco vuoto: non serve ripeterlo ogni mezzo secondo. */
 	private final Set<UUID> sentEmpty = new HashSet<>();
 	private FriendBars bars;
+	private FurnaceXp furnaceXp;
 
 	@Override
 	public void onEnable() {
 		getServer().getMessenger().registerOutgoingPluginChannel(this, PlayersPacket.CHANNEL);
+		getServer().getMessenger().registerOutgoingPluginChannel(this, FurnaceXp.CHANNEL);
 
 		bars = new FriendBars(this, includeSelf);
 		getServer().getPluginManager().registerEvents(bars, this);
@@ -44,6 +48,11 @@ public final class PapouHudPaper extends JavaPlugin {
 		getServer().getScheduler().runTaskTimer(this, this::sendPlayers, PACKET_INTERVAL_TICKS, PACKET_INTERVAL_TICKS);
 		getServer().getScheduler().runTaskTimer(this,
 				() -> bars.update(getServer().getOnlinePlayers()), BAR_INTERVAL_TICKS, BAR_INTERVAL_TICKS);
+		furnaceXp = new FurnaceXp(getLogger());
+		getServer().getScheduler().runTaskTimer(this,
+				() -> furnaceXp.tick(getServer().getOnlinePlayers(),
+						(player, data) -> player.sendPluginMessage(this, FurnaceXp.CHANNEL, data)),
+				FURNACE_INTERVAL_TICKS, FURNACE_INTERVAL_TICKS);
 	}
 
 	@Override

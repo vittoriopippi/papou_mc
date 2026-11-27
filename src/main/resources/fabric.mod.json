@@ -17,6 +17,9 @@
 			"com.giulio.papouhud.PapouHudClient"
 		]
 	},
+	"mixins": [
+		"papouhud.mixins.json"
+	],
 	"accessWidener": "papouhud.classtweaker",
 	"depends": {
 		"fabricloader": ">=0.19.3",

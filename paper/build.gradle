@@ -44,4 +44,7 @@ test {
 	def golden = rootProject.file("src/test/resources/players-v1.hex")
 	inputs.file(golden)
 	systemProperty "papouhud.golden", golden.absolutePath
+	def furnaceGolden = rootProject.file("src/test/resources/furnace-xp-v1.hex")
+	inputs.file(furnaceGolden)
+	systemProperty "papouhud.golden.furnace", furnaceGolden.absolutePath
 }

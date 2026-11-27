@@ -13,6 +13,7 @@
 	"papouhud.config.column_show": "Display",
 	"papouhud.config.column_key": "Shortcut",
 	"papouhud.config.size": "HUD size",
+	"papouhud.config.mob_health": "Mob health",
 	"papouhud.config.hint": "Click a shortcut, then press the new key. Delete = none, Esc = cancel.",
 	"papouhud.update.title": "Papou HUD update available",
 	"papouhud.update.message": "Version %s is out (you have %s). Download it now? It will be installed when you close the game.",
