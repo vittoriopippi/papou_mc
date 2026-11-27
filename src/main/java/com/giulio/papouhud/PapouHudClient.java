@@ -22,7 +22,8 @@ import net.minecraft.util.Mth;
  *  - un menu (tasto configurabile) per attivare/disattivare gli elementi e scegliere le scorciatoie;
  *  - all'avvio, un popup se su GitHub c'e' una versione piu' recente (vedi UpdateChecker);
  *  - nelle fornaci, l'XP accumulata (vedi FurnaceXpOverlay e, lato server, FurnaceXpSync);
- *  - dopo la morte, un teschio sulla locator bar e promemoria in chat per 5 minuti (vedi DeathMarker).
+ *  - dopo la morte, un teschio sulla locator bar e promemoria in chat per 5 minuti (vedi DeathMarker);
+ *  - sui server, le schede creative gia' pronte, cosi' Inventory Sorter ordina per categoria (vedi CreativeTabs).
  */
 public class PapouHudClient implements ClientModInitializer {
 	private static final int MARGIN = 4;
@@ -43,6 +44,7 @@ public class PapouHudClient implements ClientModInitializer {
 		FurnaceXpOverlay.register();
 		RemotePlayers.register();
 		ClientTickEvents.END_CLIENT_TICK.register(DeathMarker::tick);
+		CreativeTabs.register();
 
 		HudElementRegistry.attachElementAfter(
 				VanillaHudElements.CHAT,

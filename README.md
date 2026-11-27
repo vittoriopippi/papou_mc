@@ -8,6 +8,7 @@ A client-side [Fabric](https://fabricmc.net/) mod for Minecraft that adds a smal
 - **Settings menu** – show or hide each element and rebind every shortcut in game.
 - **Furnace XP** – furnaces, smokers and blast furnaces show how much XP they are holding, next to their title.
 - **Death marker** – after you die, a skull on the locator bar points to where you died for 5 minutes, with a reminder in chat every minute.
+- **Inventory Sorter on any server** – with [Inventory Sorter](https://modrinth.com/mod/inventory-sorting) set to "Sort by: Category", chests are sorted by category on servers without Inventory Sorter too, such as Paper (see [Inventory Sorter](#inventory-sorter)).
 - **Update check** – when a new version is released, a popup at startup offers to install it.
 
 ![Friend panels in the top-left corner, compass and coordinates at the top](docs/screenshots/hud.png)
@@ -98,6 +99,12 @@ When you die, a skull appears on the locator bar (the bar above the hotbar that 
 - **Locator bar:** right after respawning, the game shows the XP bar for a few seconds before switching back to the locator bar.
 
 Everything happens in your own game, so it works on any server and with Essential. To turn it off, set `"deathMarkerEnabled": false` in the config file.
+
+## Inventory Sorter
+
+[Inventory Sorter](https://modrinth.com/mod/inventory-sorting) can sort by name or by category ("Sort by: Category", the same order as the creative inventory: building blocks, then natural blocks, tools, food and so on). To switch, hover over its sort button in a chest and scroll the mouse wheel; the tooltip shows the current method.
+
+On a server without Inventory Sorter, such as Paper, the mod sorts from your own game, and sorting by category needs the creative inventory's tabs. Minecraft fills those only when you open the creative inventory, so in survival they stay empty and every chest comes out in alphabetical order instead. Papou HUD fills them when you join a server, so "Sort by: Category" works there too. In singleplayer, and on Fabric servers with Inventory Sorter, the server does the sorting and nothing changes.
 
 ## Updates
 

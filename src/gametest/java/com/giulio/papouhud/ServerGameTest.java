@@ -14,6 +14,7 @@ import net.minecraft.client.gui.screens.ConnectScreen;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.multiplayer.resolver.ServerAddress;
+import net.minecraft.world.item.CreativeModeTabs;
 
 /**
  * Joins a real server and checks what it sends: a Fabric server with the mod, or a Paper server
@@ -52,6 +53,12 @@ public class ServerGameTest implements FabricClientGameTest {
 				ServerAddress.parseString(address), new ServerData("Papou test", address, ServerData.Type.OTHER),
 				false, null));
 		context.waitFor(mc -> mc.player != null && mc.level != null && mc.gui.screen() == null, 20 * 120);
+		// CreativeTabs fills the creative tabs on join (Inventory Sorter's Category order needs them).
+		context.runOnClient(mc -> {
+			if (CreativeModeTabs.searchTab().getDisplayItems().isEmpty()) {
+				throw new AssertionError("The creative tabs are still empty after joining the server");
+			}
+		});
 
 		// The armor is put on from outside once everyone is in: wait for it to show up.
 		context.waitFor(mc -> {
